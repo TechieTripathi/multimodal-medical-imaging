@@ -1,0 +1,50 @@
+{
+ "provenance": {
+  "model": "ResNet-50 (resnet50.a1_in1k, timm), trained on ImageNet photographs",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_cnn_features.py",
+  "input": "LIDC-IDRI-0001 CT slice, lung window, 448\u00d7448",
+  "note": "Real activations of a general-purpose image model; not a medical model."
+ },
+ "layers": [
+  {
+   "layer": "early",
+   "grid": [
+    112,
+    112
+   ],
+   "channels": 256,
+   "files": [
+    "early_0.png",
+    "early_1.png",
+    "early_2.png"
+   ]
+  },
+  {
+   "layer": "middle",
+   "grid": [
+    56,
+    56
+   ],
+   "channels": 512,
+   "files": [
+    "middle_0.png",
+    "middle_1.png",
+    "middle_2.png"
+   ]
+  },
+  {
+   "layer": "late",
+   "grid": [
+    14,
+    14
+   ],
+   "channels": 2048,
+   "files": [
+    "late_0.png",
+    "late_1.png",
+    "late_2.png"
+   ]
+  }
+ ]
+}

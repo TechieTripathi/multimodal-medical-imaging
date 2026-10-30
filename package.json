@@ -1,0 +1,22 @@
+{
+  "name": "multimodal-medical-imaging",
+  "private": true,
+  "type": "module",
+  "description": "58-slide Slidev FDP session: Multimodal AI Models for Medical Imaging Analysis",
+  "scripts": {
+    "dev": "slidev --open",
+    "build": "slidev build --out exports/spa",
+    "export": "slidev export --with-clicks --timeout 90000 --output exports/multimodal-medical-imaging-all-steps.pdf",
+    "export:handout": "slidev export --timeout 90000 --output exports/multimodal-medical-imaging-handout.pdf",
+    "export:notes": "slidev export-notes --output exports/speaker-notes.pdf",
+    "check": "node scripts/check-deck.mjs && node --experimental-strip-types scripts/check-timing.mjs",
+    "check:urls": "node scripts/check-urls.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@slidev/cli": "^53.0.0",
+    "@slidev/theme-default": "^0.25.0",
+    "playwright-chromium": "^1.64.0"
+  }
+}

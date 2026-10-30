@@ -1,0 +1,19 @@
+{
+ "stored_bits": 14,
+ "stored_range": [
+  171,
+  15396
+ ],
+ "rows": 2022,
+ "cols": 2022,
+ "window": [
+  289.0,
+  12499.0
+ ],
+ "model_input": 224,
+ "normalised_range": [
+  -1.79,
+  1.93
+ ],
+ "pixels_kept_pct": 1.2
+}

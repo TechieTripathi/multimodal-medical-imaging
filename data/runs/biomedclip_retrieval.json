@@ -1,0 +1,77 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "query": "a chest X-ray showing an enlarged heart (cardiomegaly)",
+ "searched": 645,
+ "top5": [
+  {
+   "thumb": "thumbs/ret_0.png",
+   "score": 0.4868,
+   "label": "cardiomegaly in report",
+   "mesh": [
+    "Cardiomegaly/severe",
+    "Nodule/thorax/left",
+    "Granuloma/thorax/left",
+    "Lung/hilum/lymph nodes/left/enlarged"
+   ],
+   "impression": "Marked increase in heart size. Cardiomegaly. Question pericardial effusion. Stable 1.5 cm nodule left mid chest, XXXX a granuloma. Lungs are clear. No effusion. Stable left hilar lymphadenopathy."
+  },
+  {
+   "thumb": "thumbs/ret_1.png",
+   "score": 0.4652,
+   "label": "cardiomegaly in report",
+   "mesh": [
+    "Scoliosis/thoracic vertebrae/right/mild",
+    "Cardiomegaly/mild",
+    "Lung/blood vessels/left/prominent/mild",
+    "Lung/azygos lobe"
+   ],
+   "impression": "2 views of the chest demonstrate sternotomy XXXX and mild thoracic dextroscoliosis. Incidental note of an azygos pseudofissure. The heart is mildly enlarged and pulmonary vasculature appears somewhat more prominent on the left than on the right, but the lungs appear clear, with no evidence of pleural effusion."
+  },
+  {
+   "thumb": "thumbs/ret_2.png",
+   "score": 0.4646,
+   "label": "cardiomegaly in report",
+   "mesh": [
+    "Cardiomegaly",
+    "Opacity/lung/bilateral/interstitial/mild",
+    "Pulmonary Edema/mild"
+   ],
+   "impression": "Stable cardiomegaly and mild bilateral interstitial opacities which represent mild pulmonary edema."
+  },
+  {
+   "thumb": "thumbs/ret_3.png",
+   "score": 0.4607,
+   "label": "cardiomegaly in report",
+   "mesh": [
+    "Cardiomegaly",
+    "Calcinosis/lung/base/left"
+   ],
+   "impression": "No acute cardiopulmonary abnormalities. Stable cardiomegaly."
+  },
+  {
+   "thumb": "thumbs/ret_4.png",
+   "score": 0.4594,
+   "label": "cardiomegaly in report",
+   "mesh": [
+    "Surgical Instruments/mediastinum",
+    "Atherosclerosis/aorta",
+    "Aorta, Thoracic/tortuous",
+    "Cardiomegaly",
+    "Calcinosis/mitral valve/prominent",
+    "Mediastinum/prominent"
+   ],
+   "impression": "1. No acute cardiopulmonary abnormality. 2. Stable cardiomegaly, tortuous thoracic aorta and atherosclerotic calcification. ."
+  }
+ ],
+ "precision_at_5": 1.0,
+ "source": "Indiana University chest X-ray collection (Open-i)"
+}

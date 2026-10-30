@@ -1,0 +1,78 @@
+{
+ "source": "LIDC-IDRI-0001 DICOM SR (Fedorov et al. conversion), TCIA, CC BY 3.0",
+ "note": "Diameter and volume were computed by pylidc from each reader's outline; ratings are the reader's own.",
+ "readers": [
+  {
+   "series": "Nodule 1 - Annotation Nodule 001 evaluations",
+   "items": {
+    "Finding": "Nodule",
+    "Finding Site": "Lung",
+    "Volume": "7869 mm3",
+    "Diameter": "32 mm",
+    "Subtlety score": "5 out of 5 (Obvious)",
+    "Internal structure": "Soft tissue",
+    "Calcification": "Absent",
+    "Sphericity": "ovoid",
+    "Margin": "3 out of 5",
+    "Lobular Pattern": "3 out of 5",
+    "Spiculation": "4 out of 5",
+    "Texture": "solid pulmonary nodule",
+    "Malignancy": "5 out of 5 (Highly Suspicious for Cancer)"
+   }
+  },
+  {
+   "series": "Nodule 1 - Annotation IL057_127364 evaluations",
+   "items": {
+    "Finding": "Nodule",
+    "Finding Site": "Lung",
+    "Volume": "6146 mm3",
+    "Diameter": "33 mm",
+    "Subtlety score": "5 out of 5 (Obvious)",
+    "Internal structure": "Soft tissue",
+    "Calcification": "Absent",
+    "Sphericity": "4 out of 5",
+    "Margin": "4 out of 5",
+    "Lobular Pattern": "5 out of 5 (Marked lobulation)",
+    "Spiculation": "5 out of 5 (Marked spiculation)",
+    "Texture": "solid pulmonary nodule",
+    "Malignancy": "5 out of 5 (Highly Suspicious for Cancer)"
+   }
+  },
+  {
+   "series": "Nodule 1 - Annotation MI014_12127 evaluations",
+   "items": {
+    "Finding": "Nodule",
+    "Finding Site": "Lung",
+    "Volume": "6594 mm3",
+    "Diameter": "32 mm",
+    "Subtlety score": "5 out of 5 (Obvious)",
+    "Internal structure": "Soft tissue",
+    "Calcification": "Absent",
+    "Sphericity": "ovoid",
+    "Margin": "2 out of 5",
+    "Lobular Pattern": "3 out of 5",
+    "Spiculation": "3 out of 5",
+    "Texture": "solid pulmonary nodule",
+    "Malignancy": "5 out of 5 (Highly Suspicious for Cancer)"
+   }
+  },
+  {
+   "series": "Nodule 1 - Annotation 0 evaluations",
+   "items": {
+    "Finding": "Nodule",
+    "Finding Site": "Lung",
+    "Volume": "7348 mm3",
+    "Diameter": "34 mm",
+    "Subtlety score": "5 out of 5 (Obvious)",
+    "Internal structure": "Soft tissue",
+    "Calcification": "Absent",
+    "Sphericity": "round",
+    "Margin": "4 out of 5",
+    "Lobular Pattern": "1 out of 5 (No lobulation)",
+    "Spiculation": "5 out of 5 (Marked spiculation)",
+    "Texture": "4 out of 5",
+    "Malignancy": "4 out of 5 (Moderately Suspicious for Cancer)"
+   }
+  }
+ ]
+}

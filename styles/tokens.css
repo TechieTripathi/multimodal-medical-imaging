@@ -1,0 +1,71 @@
+/*
+ * Design tokens — the only place colors, type and spacing are defined.
+ * Colours, fonts, radius and motion are the series theme (llm-to-agents); the type scale is
+ * larger and artifacts are never shrunk, per IDEA.md §4.3 and §4.8.
+ */
+:root {
+  /* Surfaces */
+  --paper: #f7f7f5;          /* slide background: cool off-white, low projector glare */
+  --surface: #ffffff;        /* raised panels */
+  --stage: #eef0f2;          /* quiet fill for a single panel or chip */
+  --rule: #d9dce1;           /* hairlines, borders */
+  --rule-strong: #b9bec6;
+
+  /* Ink */
+  --ink: #1a1a1a;            /* primary text */
+  --ink-2: #4a4f57;          /* secondary text (AA on paper) */
+  --ink-3: #6b7078;          /* tertiary / captions (AA large) */
+  --ink-inverse: #f7f7f5;
+
+  /* Accent: deep ultramarine, survives projector wash-out */
+  --accent: #2340c8;
+  --accent-strong: #1a2f96;
+  --accent-tint: #e5e9fb;
+  --accent-tint-2: #c9d2f6;
+
+  /* Status (semantic, always paired with icon or label) */
+  --ok: #1e7a46;      --ok-tint: #e1f1e7;
+  --warn: #a35f00;    --warn-tint: #fbefd9;
+  --bad: #c0352b;     --bad-tint: #f9e3e1;
+  --neutral: #6b7078; --neutral-tint: #eceef0;
+
+  /* Inverted (section openers only) */
+  --night: #16181c;
+  --night-2: #2a2e35;
+
+  /* Dark panel behind medical images, so greyscale reads correctly on a projector */
+  --image-mat: #0b0d10;
+  --image-ink: #e8eaed;      /* labels drawn on the mat */
+
+  /* Type */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Type scale at the 980×552 canvas (IDEA.md §4.3). Nothing smaller than --fs-label except --fs-micro. */
+  --fs-display: 48px;
+  --fs-title: 36px;
+  --fs-lead: 24px;
+  --fs-body: 22px;
+  --fs-small: 20px;
+  --fs-label: 18px;
+  --fs-micro: 14px;          /* footer, image credits and honesty labels only */
+
+  /* Spacing */
+  --gutter: 56px;            /* slide side padding */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+
+  /* Artifacts are never shrunk (IDEA.md §4.8). */
+  --artifact-scale: 1;
+
+  --radius: 6px;
+  --radius-sm: 3px;
+  --stroke: 1.5px;
+
+  /* Motion */
+  --dur: 0.4s;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0.01s; }
+}

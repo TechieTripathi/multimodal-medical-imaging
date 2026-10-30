@@ -1,0 +1,53 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "dataset": "FIVES test set, 200 fundus photographs, 50 per class",
+ "prompts": [
+  "a retinal fundus photograph showing age-related macular degeneration",
+  "a retinal fundus photograph showing diabetic retinopathy",
+  "a retinal fundus photograph showing glaucoma",
+  "a retinal fundus photograph showing a normal retina"
+ ],
+ "classes": [
+  "age-related macular degeneration",
+  "diabetic retinopathy",
+  "glaucoma",
+  "a normal retina"
+ ],
+ "accuracy": 0.27,
+ "chance_accuracy": 0.25,
+ "confusion": [
+  [
+   4,
+   11,
+   31,
+   4
+  ],
+  [
+   4,
+   19,
+   10,
+   17
+  ],
+  [
+   1,
+   1,
+   17,
+   31
+  ],
+  [
+   0,
+   0,
+   36,
+   14
+  ]
+ ]
+}

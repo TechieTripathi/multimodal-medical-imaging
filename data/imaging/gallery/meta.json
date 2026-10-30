@@ -1,0 +1,32 @@
+{
+ "xray": {
+  "file": "xray.png",
+  "credit": "LIDC-IDRI, TCIA \u00b7 CC BY 3.0",
+  "dicom": "usually DICOM"
+ },
+ "ct": {
+  "file": "ct.png",
+  "credit": "LIDC-IDRI, TCIA \u00b7 CC BY 3.0",
+  "dicom": "usually DICOM"
+ },
+ "mri": {
+  "file": "mri.png",
+  "credit": "UPENN-GBM, TCIA \u00b7 CC BY 4.0",
+  "dicom": "usually DICOM"
+ },
+ "ultrasound": {
+  "file": "ultrasound.png",
+  "credit": "HC18 (van den Heuvel et al.), Zenodo \u00b7 CC BY 4.0",
+  "dicom": "often DICOM, often exported as video or images"
+ },
+ "pathology": {
+  "file": "pathology.png",
+  "credit": "CRC-VAL-HE-7K (Kather et al.), Zenodo \u00b7 CC BY 4.0",
+  "dicom": "rarely DICOM: whole-slide images use vendor formats"
+ },
+ "retina": {
+  "file": "retina.png",
+  "credit": "FIVES (Jin et al.), figshare \u00b7 CC BY 4.0",
+  "dicom": "often not DICOM: cameras export JPEG or PNG"
+ }
+}

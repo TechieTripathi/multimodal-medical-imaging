@@ -1,0 +1,26 @@
+{
+ "provenance": {
+  "model": "CLIP ViT-L/14 (openai/clip-vit-large-patch14) vs BiomedCLIP",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "dataset": "CRC-VAL-HE-7K (Kather et al.), 100 random tiles per class, 9 classes",
+ "clip_accuracy": {
+  "abbreviation": 0.151,
+  "plain name": 0.333,
+  "photo template": 0.464,
+  "histology template": 0.476
+ },
+ "biomedclip_accuracy": {
+  "abbreviation": 0.081,
+  "plain name": 0.357,
+  "photo template": 0.381,
+  "histology template": 0.518
+ },
+ "chance_accuracy": 0.111
+}

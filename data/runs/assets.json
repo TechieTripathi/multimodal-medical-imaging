@@ -1,0 +1,38 @@
+{
+ "ct": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "dx": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "mri": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "sr": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "gallery": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "attn": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "dicom": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "pipeline": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ },
+ "apps": {
+  "built": "2026-10-30",
+  "script": "notebook/prepare_deck_assets.py"
+ }
+}

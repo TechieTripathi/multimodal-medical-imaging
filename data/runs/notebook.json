@@ -1,0 +1,27 @@
+{
+ "device": "NVIDIA RTX PRO 4000 Blackwell",
+ "biomedclip_seconds_per_image": {
+  "cpu_s": 1.176,
+  "gpu_s": 0.0244
+ },
+ "patient_xray_ranking": {
+  "a chest X-ray showing a mass in the lung": 0.405,
+  "a normal chest X-ray": 0.4006,
+  "a chest X-ray showing fluid around the lung (pleural effusion)": 0.3993,
+  "a chest X-ray showing a collapsed lung (pneumothorax)": 0.3759,
+  "a chest X-ray showing an enlarged heart (cardiomegaly)": 0.3323,
+  "an axial CT scan of the chest": 0.3023,
+  "an MRI scan of the brain": 0.2271
+ },
+ "softmax_top2": [
+  0.418,
+  0.287
+ ],
+ "medsam_dice_vs_readers": [
+  0.745,
+  0.76,
+  0.763,
+  0.765
+ ],
+ "run_date": "2026-10-30"
+}

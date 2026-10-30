@@ -1,0 +1,108 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "pairs": [
+  {
+   "image": "thumbs/pair_0.png",
+   "text": "No acute findings.",
+   "label": "normal",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  },
+  {
+   "image": "thumbs/pair_1.png",
+   "text": "Stable mild cardiomegaly.",
+   "label": "cardiomegaly",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  },
+  {
+   "image": "thumbs/pair_2.png",
+   "text": "There are small calcified granulomata in the right lateral lung.",
+   "label": "calcified granuloma",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  },
+  {
+   "image": "thumbs/pair_3.png",
+   "text": "There is a scoliosis of the thoracic spine.",
+   "label": "scoliosis",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  },
+  {
+   "image": "thumbs/pair_4.png",
+   "text": "There are right upper quadrant surgical clips, perhaps from cholecystectomy.",
+   "label": "surgical instruments",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  },
+  {
+   "image": "thumbs/pair_5.png",
+   "text": "Minimally increased air space opacities bilaterally, most prominent in the lung bases.",
+   "label": "opacity",
+   "source": "Indiana University chest X-ray collection (Open-i)"
+  }
+ ],
+ "similarity": [
+  [
+   0.3187,
+   0.3097,
+   0.3509,
+   0.3684,
+   0.3775,
+   0.3616
+  ],
+  [
+   0.3858,
+   0.3533,
+   0.3521,
+   0.3506,
+   0.429,
+   0.3921
+  ],
+  [
+   0.316,
+   0.3024,
+   0.3684,
+   0.3814,
+   0.3934,
+   0.3467
+  ],
+  [
+   0.3545,
+   0.35,
+   0.3872,
+   0.3492,
+   0.4087,
+   0.3853
+  ],
+  [
+   0.3806,
+   0.3073,
+   0.3898,
+   0.3344,
+   0.4197,
+   0.3536
+  ],
+  [
+   0.3441,
+   0.3287,
+   0.3784,
+   0.3494,
+   0.3466,
+   0.3988
+  ]
+ ],
+ "diagonal_is_max_in_row": [
+  false,
+  false,
+  false,
+  false,
+  true,
+  true
+ ]
+}

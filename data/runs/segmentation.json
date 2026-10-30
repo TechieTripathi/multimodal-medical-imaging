@@ -1,0 +1,126 @@
+{
+ "provenance": {
+  "run_date": "2026-10-30",
+  "script": "notebook/run_segmentation.py",
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "data": "LIDC-IDRI-0001 chest CT, TCIA, CC BY 3.0",
+  "note": "Research software. Masks are not validated for clinical use."
+ },
+ "totalsegmentator": {
+  "tool": "TotalSegmentator",
+  "version": "2.18.0",
+  "task": "total",
+  "input": "the CT DICOM folder, read directly",
+  "runtime_s_first_run": null,
+  "labels_file": "labels_u8.bin",
+  "shape_zyx": [
+   133,
+   144,
+   144
+  ],
+  "groups": [
+   {
+    "id": 1,
+    "name": "Lungs",
+    "parts": 5,
+    "volume_ml": 3697.0
+   },
+   {
+    "id": 2,
+    "name": "Heart",
+    "parts": 1,
+    "volume_ml": 370.3
+   },
+   {
+    "id": 3,
+    "name": "Aorta",
+    "parts": 1,
+    "volume_ml": 188.1
+   },
+   {
+    "id": 4,
+    "name": "Airway",
+    "parts": 1,
+    "volume_ml": 24.7
+   },
+   {
+    "id": 5,
+    "name": "Spine",
+    "parts": 25,
+    "volume_ml": 451.1
+   },
+   {
+    "id": 6,
+    "name": "Ribs",
+    "parts": 24,
+    "volume_ml": 274.3
+   },
+   {
+    "id": 7,
+    "name": "Liver",
+    "parts": 1,
+    "volume_ml": 1018.1
+   }
+  ]
+ },
+ "medsam": {
+  "model": "MedSAM (wanglab/medsam-vit-base, Hugging Face port)",
+  "model_source": "https://huggingface.co/wanglab/medsam-vit-base",
+  "slice": 89,
+  "box_xyxy": [
+   294,
+   336,
+   340,
+   390
+  ],
+  "prompt": "box around the radiologists' combined outline, padded by 5 pixels",
+  "window": "soft tissue (level 40, width 400)",
+  "inference_s": 1.08,
+  "mask_crop": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/gAAAAAAAAAAAf8AAAAAAAAAAAH/wAAAAAAAAAAD/8AAAAAAAAAAA//gAAAAAAAAAAP/8AAAAAAAAAAH//gAAAAAAAAAD//8AAAAAAAAAA///wAAAAAAAAAP//+AAAAAAAAAH///wAAAAAAAAD///8AAAAAAAAA////gAAAAAAAAP///8AAAAAAAAD////gAAAAAAAA////4AAAAAAAAP////AAAAAAAAD////wAAAAAAAB////8AAAAAAAAf///+AAAAAAAAH////AAAAAAAAB////gAAAAAAAAf///gAAAAAAAAD///wAAAAAAAAA///4AAAAAAAAAD//8AAAAAAAAAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+  "dice_vs_readers": [
+   0.745,
+   0.76,
+   0.763,
+   0.765
+  ],
+  "dice_between_readers_on_slice": [
+   [
+    1.0,
+    0.913,
+    0.917,
+    0.924
+   ],
+   [
+    0.913,
+    1.0,
+    0.938,
+    0.937
+   ],
+   [
+    0.917,
+    0.938,
+    1.0,
+    0.918
+   ],
+   [
+    0.924,
+    0.937,
+    0.918,
+    1.0
+   ]
+  ],
+  "area_mm2": {
+   "medsam": 272.9,
+   "readers": [
+    459.3,
+    444.9,
+    442.5,
+    440.5
+   ]
+  }
+ },
+ "nodule_vs_lung_label": {
+  "nodule_voxels": 6547,
+  "fraction_inside_lung_label": 0.999
+ }
+}

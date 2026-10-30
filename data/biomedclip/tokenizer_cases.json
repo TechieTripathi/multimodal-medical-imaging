@@ -1,0 +1,178 @@
+{
+ "tokenizer": "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract (used by BiomedCLIP)",
+ "context_length": 256,
+ "cases": [
+  {
+   "text": "Solid spiculated nodule in the left lower lobe.",
+   "tokens": [
+    "[CLS]",
+    "solid",
+    "spi",
+    "##cu",
+    "##lated",
+    "nodule",
+    "in",
+    "the",
+    "left",
+    "lower",
+    "lobe",
+    ".",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    5010,
+    10325,
+    27933,
+    15161,
+    14227,
+    1682,
+    1680,
+    3326,
+    2503,
+    8763,
+    17,
+    3
+   ]
+  },
+  {
+   "text": "No acute cardiopulmonary abnormality.",
+   "tokens": [
+    "[CLS]",
+    "no",
+    "acute",
+    "cardiopulmonary",
+    "abnormality",
+    ".",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    1982,
+    2959,
+    11012,
+    10281,
+    17,
+    3
+   ]
+  },
+  {
+   "text": "Cardiomegaly with small bilateral pleural effusions.",
+   "tokens": [
+    "[CLS]",
+    "cardio",
+    "##me",
+    "##gal",
+    "##y",
+    "with",
+    "small",
+    "bilateral",
+    "pleural",
+    "effusions",
+    ".",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    22339,
+    3947,
+    7322,
+    1005,
+    1715,
+    2718,
+    5718,
+    10106,
+    20196,
+    17,
+    3
+   ]
+  },
+  {
+   "text": "The patient has pneumonia",
+   "tokens": [
+    "[CLS]",
+    "the",
+    "patient",
+    "has",
+    "pneumonia",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    1680,
+    2348,
+    2029,
+    6140,
+    3
+   ]
+  },
+  {
+   "text": "Ground-glass opacity, 8 mm, unchanged since 2019.",
+   "tokens": [
+    "[CLS]",
+    "ground",
+    "-",
+    "glass",
+    "opacity",
+    ",",
+    "8",
+    "mm",
+    ",",
+    "unchanged",
+    "since",
+    "2019",
+    ".",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    6620,
+    16,
+    7580,
+    26166,
+    15,
+    27,
+    2560,
+    15,
+    7952,
+    3709,
+    20733,
+    17,
+    3
+   ]
+  },
+  {
+   "text": "Lymphadenopathy, caf\u00e9-au-lait spots!",
+   "tokens": [
+    "[CLS]",
+    "lymphadenopathy",
+    ",",
+    "caf",
+    "##e",
+    "-",
+    "au",
+    "-",
+    "la",
+    "##it",
+    "spots",
+    "!",
+    "[SEP]"
+   ],
+   "ids": [
+    2,
+    19251,
+    15,
+    22403,
+    1007,
+    16,
+    5721,
+    16,
+    5736,
+    1692,
+    12754,
+    5,
+    3
+   ]
+  }
+ ]
+}

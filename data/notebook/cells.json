@@ -1,0 +1,78 @@
+{
+ "A1": {
+  "code": "# A1. Read every file's header (not the pixels yet) and look at its position\nct_dir = glob.glob(os.path.join(LIDC, 'CT-*'))[0]\nfiles = sorted(glob.glob(os.path.join(ct_dir, '*.dcm')))\nheaders = [pydicom.dcmread(f, stop_before_pixels=True) for f in files]\n\nfor f, h in list(zip(files, headers))[:4]:\n    print(os.path.basename(f), '| instance', h.InstanceNumber,\n          '| z =', float(h.ImagePositionPatient[2]), 'mm')\n\n# Sort by height in the body (z), not by file name\norder = np.argsort([float(h.ImagePositionPatient[2]) for h in headers])\nheaders = [headers[i] for i in order]\nfiles = [files[i] for i in order]\nprint(len(files), 'slices, from z =', float(headers[0].ImagePositionPatient[2]),\n      'to', float(headers[-1].ImagePositionPatient[2]), 'mm')",
+  "output": "00000001.dcm | instance 80 | z = -207.5 mm\n00000002.dcm | instance 52 | z = -137.5 mm\n00000003.dcm | instance 42 | z = -112.5 mm\n00000004.dcm | instance 59 | z = -155.0 mm\n133 slices, from z = -340.0 to -10.0 mm",
+  "figures": []
+ },
+ "A1b": {
+  "code": "# A1b. A few tags that matter for analysis (and one group that matters for privacy)\nh = headers[0]\nfor kw in ['Modality', 'Manufacturer', 'SliceThickness', 'PixelSpacing',\n           'RescaleSlope', 'RescaleIntercept', 'PatientName', 'PatientIdentityRemoved']:\n    print(f'{kw:24s}', h.get(kw, '(not present)'))",
+  "output": "Modality                 CT\nManufacturer             GE MEDICAL SYSTEMS\nSliceThickness           2.500000\nPixelSpacing             [0.703125, 0.703125]\nRescaleSlope             1\nRescaleIntercept         -1024\nPatientName              \nPatientIdentityRemoved   YES",
+  "figures": []
+ },
+ "A2": {
+  "code": "# A2. Build the volume in Hounsfield units, then show one slice with three windows\nvolume = np.stack([pydicom.dcmread(f).pixel_array for f in files]).astype(np.float32)\nvolume = volume * float(h.RescaleSlope) + float(h.RescaleIntercept)   # stored \u2192 HU\n\ndef window(img, level, width):\n    lo = level - width / 2\n    return np.clip((img - lo) / width, 0, 1)\n\nk = 89                                         # the slice through the nodule\nfig, axes = plt.subplots(1, 3, figsize=(12, 4))\nfor ax, (name, L, W) in zip(axes, [('Lung', -600, 1500), ('Soft tissue', 40, 400), ('Bone', 400, 1800)]):\n    ax.imshow(window(volume[k], L, W), cmap='gray'); ax.set_title(f'{name} (L {L}, W {W})'); ax.axis('off')\nplt.show()\nprint('HU range on this slice:', int(volume[k].min()), 'to', int(volume[k].max()))",
+  "output": "HU range on this slice: -2048 to 3071",
+  "figures": [
+   "A2_0.png"
+  ]
+ },
+ "A3": {
+  "code": "# A3. Let SimpleITK read and sort the series, then cut it three ways\nreader = sitk.ImageSeriesReader()\nreader.SetFileNames(reader.GetGDCMSeriesFileNames(ct_dir))\nct = reader.Execute()                          # already in HU, with spacing and position\narr = sitk.GetArrayFromImage(ct)               # (z, y, x)\nsx, sy, sz = ct.GetSpacing()\nprint('Size', ct.GetSize(), '| spacing (mm)', tuple(round(s, 2) for s in ct.GetSpacing()))\n\nz, y, x = 89, 367, 316                         # the nodule\nfig, axes = plt.subplots(1, 3, figsize=(13, 4.5))\naxes[0].imshow(window(arr[z], -600, 1500), cmap='gray'); axes[0].set_title('Axial')\naxes[1].imshow(window(arr[::-1, y, :], -600, 1500), cmap='gray', aspect=sz / sx); axes[1].set_title('Coronal')\naxes[2].imshow(window(arr[::-1, :, x], -600, 1500), cmap='gray', aspect=sz / sy); axes[2].set_title('Sagittal')\nfor ax in axes: ax.axis('off')\nplt.show()",
+  "output": "Size (512, 512, 133) | spacing (mm) (0.7, 0.7, 2.5)",
+  "figures": [
+   "A3_0.png"
+  ]
+ },
+ "A4": {
+  "code": "# A4. Other modalities, other rules: the same patient's X-ray, and a brain MRI series\ndx = pydicom.dcmread(glob.glob(os.path.join(LIDC, 'DX-*', '*.dcm'))[0])\nprint('X-ray:', dx.Rows, 'x', dx.Columns, '|', dx.BitsStored, 'bits |', dx.PhotometricInterpretation,\n      '| window tags', dx.WindowCenter, dx.WindowWidth, '(these look copied from a CT)')\nmri_dir = os.path.join(DATA, 'upenn', 't2_Flair_axial')\nif os.path.isdir(mri_dir):\n    m = pydicom.dcmread(sorted(glob.glob(os.path.join(mri_dir, '*.dcm')))[0], stop_before_pixels=True)\n    print('MRI:', m.SeriesDescription, '| slice', m.SliceThickness, 'mm | no Hounsfield units: values are relative')",
+  "output": "X-ray: 2022 x 2022 | 14 bits | MONOCHROME2 | window tags -600 1600 (these look copied from a CT)\nMRI: t2_Flair_axial: Processed_CaPTk | slice 3 mm | no Hounsfield units: values are relative",
+  "figures": []
+ },
+ "B1": {
+  "code": "# B1. Load BiomedCLIP and prepare our patient's X-ray from DICOM\nimport open_clip\nfrom PIL import Image\n\nMODEL = 'hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224'\nmodel, preprocess = open_clip.create_model_from_pretrained(MODEL)\ntokenizer = open_clip.get_tokenizer(MODEL)\nmodel = model.to(DEVICE).eval()\n\npx = dx.pixel_array.astype(np.float32)\nlo, hi = np.percentile(px, [0.5, 99.5])                  # window: keep 99% of the values\nxray = Image.fromarray((np.clip((px - lo) / (hi - lo), 0, 1) * 255).astype(np.uint8)).convert('RGB')\nimage = preprocess(xray).unsqueeze(0).to(DEVICE)        # resize to 224 x 224, normalise\nprint('Model input:', tuple(image.shape))",
+  "output": "Model input: (1, 3, 224, 224)",
+  "figures": []
+ },
+ "B2": {
+  "code": "# B2. Score candidate descriptions by cosine similarity and rank them\ncandidates = [\n    'a normal chest X-ray',\n    'a chest X-ray showing an enlarged heart (cardiomegaly)',\n    'a chest X-ray showing fluid around the lung (pleural effusion)',\n    'a chest X-ray showing a collapsed lung (pneumothorax)',\n    'a chest X-ray showing a mass in the lung',\n    'an axial CT scan of the chest',\n    'an MRI scan of the brain',\n]\nwith torch.no_grad():\n    img_emb = torch.nn.functional.normalize(model.encode_image(image), dim=-1)\n    txt_emb = torch.nn.functional.normalize(model.encode_text(tokenizer(candidates, context_length=256).to(DEVICE)), dim=-1)\ncosine = (img_emb @ txt_emb.T)[0].cpu().numpy()\nfor i in np.argsort(-cosine):\n    print(f'{cosine[i]:.3f}  {candidates[i]}')",
+  "output": "0.405  a chest X-ray showing a mass in the lung\n0.401  a normal chest X-ray\n0.399  a chest X-ray showing fluid around the lung (pleural effusion)\n0.376  a chest X-ray showing a collapsed lung (pneumothorax)\n0.332  a chest X-ray showing an enlarged heart (cardiomegaly)\n0.302  an axial CT scan of the chest\n0.227  an MRI scan of the brain",
+  "figures": []
+ },
+ "B3": {
+  "code": "# B3. Why these are not probabilities: softmax with the model's temperature exaggerates tiny gaps\nscale = model.logit_scale.exp().item()\np = torch.softmax(torch.tensor(cosine) * scale, 0).numpy()\ntop2 = np.argsort(-cosine)[:2]\nprint(f'Cosine gap between the top two: {cosine[top2[0]] - cosine[top2[1]]:.3f}')\nprint(f'After softmax (x{scale:.0f}): {p[top2[0]]:.2f} vs {p[top2[1]]:.2f}  <- looks confident, is not calibrated')",
+  "output": "Cosine gap between the top two: 0.004\nAfter softmax (x85): 0.42 vs 0.29  <- looks confident, is not calibrated",
+  "figures": []
+ },
+ "B4": {
+  "code": "# B4. A failure case: an IU X-ray whose report says \"Small bilateral pleural effusions\"\niu = os.path.join(DATA, 'iu', 'png', 'CXR2747_IM-1198-1001.png')\nif os.path.exists(iu):\n    with torch.no_grad():\n        e = torch.nn.functional.normalize(model.encode_image(preprocess(Image.open(iu).convert('RGB')).unsqueeze(0).to(DEVICE)), dim=-1)\n    c = (e @ txt_emb.T)[0].cpu().numpy()\n    for i in np.argsort(-c)[:3]:\n        print(f'{c[i]:.3f}  {candidates[i]}')\nelse:\n    print('IU images not downloaded; see README (optional, 1.4 GB).')",
+  "output": "0.434  a normal chest X-ray\n0.386  a chest X-ray showing a mass in the lung\n0.365  a chest X-ray showing fluid around the lung (pleural effusion)",
+  "figures": []
+ },
+ "B5": {
+  "code": "# B5. How long does one image take?\ndef time_one(device, n=20):\n    m = model.to(device)\n    x = image.to(device)\n    with torch.no_grad():\n        m.encode_image(x)                                   # warm-up\n        t = time.perf_counter()\n        for _ in range(n):\n            m.encode_image(x)\n        if device == 'cuda': torch.cuda.synchronize()\n    return (time.perf_counter() - t) / n\n\ntimings = {'cpu_s': round(time_one('cpu', 5), 3)}\nif DEVICE == 'cuda':\n    timings['gpu_s'] = round(time_one('cuda'), 4)\nmodel = model.to(DEVICE)\nprint('Seconds per image:', timings)",
+  "output": "Seconds per image: {'cpu_s': 1.176, 'gpu_s': 0.0244}",
+  "figures": []
+ },
+ "C1": {
+  "code": "# C1. Run TotalSegmentator (skipped if a result already exists) and overlay a few structures\nfrom totalsegmentator.python_api import totalsegmentator\nfrom totalsegmentator.map_to_binary import class_map\n\nout = 'data/work/ts/total.nii.gz'\nif not os.path.exists(out):\n    t = time.perf_counter()\n    totalsegmentator(ct_dir, out, ml=True, device='gpu' if DEVICE == 'cuda' else 'cpu', fast=DEVICE != 'cuda')\n    print(f'TotalSegmentator took {time.perf_counter() - t:.0f} s')\nlabels = sitk.GetArrayFromImage(sitk.Resample(sitk.ReadImage(out), ct, sitk.Transform(), sitk.sitkNearestNeighbor, 0))\nnames = class_map['total']\nvoxel_ml = sx * sy * sz / 1000\nfor part in ['lung_lower_lobe_left', 'heart', 'aorta', 'liver']:\n    i = [k for k, v in names.items() if v == part][0]\n    print(f'{part:22s} {np.sum(labels == i) * voxel_ml:8.1f} ml')\n\nplt.figure(figsize=(5, 5))\nplt.imshow(window(arr[z], -600, 1500), cmap='gray')\nplt.imshow(np.ma.masked_equal(labels[z], 0), cmap='tab20', alpha=0.45, interpolation='nearest')\nplt.axis('off'); plt.title('TotalSegmentator labels, slice 89'); plt.show()",
+  "output": "lung_lower_lobe_left      736.7 ml\nheart                     370.3 ml\naorta                     188.1 ml\nliver                    1018.1 ml",
+  "figures": [
+   "C1_0.png"
+  ]
+ },
+ "C2": {
+  "code": "# C2. Check against the radiologists: does any label mark the nodule? Where does MedSAM agree?\nseg_files = sorted(glob.glob(os.path.join(LIDC, 'SEG-*', '*.dcm')))\nreaders = []\nfor f in seg_files:\n    s = pydicom.dcmread(f)\n    m = np.zeros(arr.shape, bool)\n    for fr, plane in zip(np.atleast_3d(s.pixel_array.transpose(1, 2, 0)).transpose(2, 0, 1), s.PerFrameFunctionalGroupsSequence):\n        kz = int(round((float(plane.PlanePositionSequence[0].ImagePositionPatient[2]) - ct.GetOrigin()[2]) / sz))\n        m[kz] |= fr.astype(bool)\n    readers.append(m)\nnodule = np.any(readers, axis=0)\nlung_ids = [k for k, v in names.items() if v.startswith('lung_')]\nprint(f'Nodule voxels inside the TotalSegmentator lung label: {np.isin(labels[nodule], lung_ids).mean():.1%}')\nprint('-> the lung outline swallows the tumour; this model outlines anatomy, not disease')\n\ndef dice(a, b): return float(2 * (a & b).sum() / (a.sum() + b.sum()))\nprint('Radiologist vs radiologist (3D Dice):', [round(dice(readers[0], r), 2) for r in readers[1:]])",
+  "output": "Nodule voxels inside the TotalSegmentator lung label: 99.9%\n-> the lung outline swallows the tumour; this model outlines anatomy, not disease\nRadiologist vs radiologist (3D Dice): [0.84, 0.87, 0.89]",
+  "figures": []
+ },
+ "C3": {
+  "code": "# C3. MedSAM: a box around the nodule on slice 89 -> an outline, compared with each radiologist\nfrom transformers import SamModel, SamProcessor\nys, xs = np.nonzero(nodule[z])\nbox = [int(xs.min()) - 5, int(ys.min()) - 5, int(xs.max()) + 5, int(ys.max()) + 5]\nrgb = np.repeat((window(arr[z], 40, 400) * 255).astype(np.uint8)[..., None], 3, axis=2)\nproc = SamProcessor.from_pretrained('wanglab/medsam-vit-base')\nsam = SamModel.from_pretrained('wanglab/medsam-vit-base').to(DEVICE).eval()\nwith torch.no_grad():\n    inp = proc(rgb, input_boxes=[[box]], return_tensors='pt').to(DEVICE)\n    out_ = sam(**inp, multimask_output=False)\nmask = proc.image_processor.post_process_masks(out_.pred_masks.sigmoid().cpu(), inp['original_sizes'].cpu(),\n                                               inp['reshaped_input_sizes'].cpu(), binarize=False)[0][0, 0].numpy() > 0.5\nprint('MedSAM vs each radiologist (Dice on this slice):', [round(dice(mask, r[z]), 2) for r in readers])",
+  "output": "MedSAM vs each radiologist (Dice on this slice): [0.75, 0.76, 0.76, 0.77]",
+  "figures": []
+ },
+ "SAVE": {
+  "code": "# Record what this run produced, so the slides can show where their numbers came from\nos.makedirs('../data/runs', exist_ok=True)\njson.dump({'device': torch.cuda.get_device_name(0) if DEVICE == 'cuda' else 'CPU',\n           'biomedclip_seconds_per_image': timings,\n           'patient_xray_ranking': {candidates[i]: round(float(cosine[i]), 4) for i in np.argsort(-cosine)},\n           'softmax_top2': [round(float(p[top2[0]]), 3), round(float(p[top2[1]]), 3)],\n           'medsam_dice_vs_readers': [round(float(dice(mask, r[z])), 3) for r in readers],\n           'run_date': time.strftime('%Y-%m-%d')},\n          open('../data/runs/notebook.json', 'w'), indent=1)\nprint('saved ../data/runs/notebook.json')",
+  "output": "saved ../data/runs/notebook.json",
+  "figures": []
+ }
+}

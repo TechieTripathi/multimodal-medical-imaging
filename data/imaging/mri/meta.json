@@ -1,0 +1,27 @@
+{
+ "source": "UPENN-GBM-00001, TCIA, CC BY 4.0",
+ "slice": 70,
+ "grid": [
+  192,
+  256,
+  192
+ ],
+ "spacing_mm": [
+  0.977,
+  0.977,
+  1.0
+ ],
+ "files": {
+  "T1": "t1.png",
+  "T1 + contrast": "t1_contrast.png",
+  "T2": "t2.png",
+  "FLAIR": "flair.png"
+ },
+ "registration": "rigid, Mattes mutual information, onto the T1 series",
+ "slice_choice": "chosen by eye through the lesion",
+ "registration_metric": {
+  "T1 + contrast": -0.6565,
+  "T2": -0.6032,
+  "FLAIR": -0.5264
+ }
+}

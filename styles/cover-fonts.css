@@ -1,0 +1,3 @@
+/* Inter, used only by the institutional cover (layouts/institution-cover.vue). Bundled, so it works offline and at any base path. */
+@font-face { font-family: 'Inter Cover'; font-weight: 400; font-display: block; src: url('./fonts/Inter-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Inter Cover'; font-weight: 700; font-display: block; src: url('./fonts/Inter-Bold.ttf') format('truetype'); }

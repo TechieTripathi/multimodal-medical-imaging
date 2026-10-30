@@ -1,0 +1,63 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "dataset": "CRC-VAL-HE-7K: test = the same 900 tiles as the zero-shot run; training tiles drawn from the rest",
+ "method": "Logistic regression on frozen BiomedCLIP image embeddings; 5 random draws per point",
+ "curve": [
+  {
+   "per_class": 1,
+   "total_labelled": 9,
+   "accuracy_mean": 0.75,
+   "accuracy_min": 0.737,
+   "accuracy_max": 0.784
+  },
+  {
+   "per_class": 2,
+   "total_labelled": 18,
+   "accuracy_mean": 0.812,
+   "accuracy_min": 0.762,
+   "accuracy_max": 0.879
+  },
+  {
+   "per_class": 5,
+   "total_labelled": 45,
+   "accuracy_mean": 0.894,
+   "accuracy_min": 0.867,
+   "accuracy_max": 0.91
+  },
+  {
+   "per_class": 10,
+   "total_labelled": 90,
+   "accuracy_mean": 0.912,
+   "accuracy_min": 0.901,
+   "accuracy_max": 0.922
+  },
+  {
+   "per_class": 25,
+   "total_labelled": 225,
+   "accuracy_mean": 0.938,
+   "accuracy_min": 0.934,
+   "accuracy_max": 0.942
+  },
+  {
+   "per_class": 50,
+   "total_labelled": 450,
+   "accuracy_mean": 0.942,
+   "accuracy_min": 0.93,
+   "accuracy_max": 0.95
+  }
+ ],
+ "zero_shot_best": {
+  "wording": "histology template",
+  "accuracy": 0.518
+ },
+ "chance_accuracy": 0.111
+}

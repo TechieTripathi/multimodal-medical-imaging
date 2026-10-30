@@ -1,0 +1,315 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "projection": "PCA of the 512-number image embeddings to 2 numbers",
+ "explained_variance": [
+  0.2075,
+  0.1821
+ ],
+ "points": [
+  {
+   "group": "Chest X-ray",
+   "x": 0.3039,
+   "y": 0.1848,
+   "thumb": "thumbs/map_0.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.3947,
+   "y": 0.0758,
+   "thumb": "thumbs/map_1.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.4571,
+   "y": 0.106,
+   "thumb": "thumbs/map_2.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.414,
+   "y": 0.1338,
+   "thumb": "thumbs/map_3.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.3989,
+   "y": 0.0962,
+   "thumb": "thumbs/map_4.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.417,
+   "y": 0.1184,
+   "thumb": "thumbs/map_5.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.3969,
+   "y": 0.1103,
+   "thumb": "thumbs/map_6.png"
+  },
+  {
+   "group": "Chest X-ray",
+   "x": 0.3367,
+   "y": 0.1325,
+   "thumb": "thumbs/map_7.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3702,
+   "y": 0.0247,
+   "thumb": "thumbs/map_8.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3605,
+   "y": 0.0811,
+   "thumb": "thumbs/map_9.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.4029,
+   "y": 0.1557,
+   "thumb": "thumbs/map_10.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3903,
+   "y": 0.1032,
+   "thumb": "thumbs/map_11.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3843,
+   "y": 0.0695,
+   "thumb": "thumbs/map_12.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3718,
+   "y": 0.0727,
+   "thumb": "thumbs/map_13.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3724,
+   "y": 0.1215,
+   "thumb": "thumbs/map_14.png"
+  },
+  {
+   "group": "Chest CT",
+   "x": 0.3364,
+   "y": 0.1061,
+   "thumb": "thumbs/map_15.png"
+  },
+  {
+   "group": "Brain MRI",
+   "x": -0.1378,
+   "y": -0.1385,
+   "thumb": "thumbs/map_16.png"
+  },
+  {
+   "group": "Brain MRI",
+   "x": -0.0939,
+   "y": -0.1348,
+   "thumb": "thumbs/map_17.png"
+  },
+  {
+   "group": "Brain MRI",
+   "x": -0.1415,
+   "y": -0.1278,
+   "thumb": "thumbs/map_18.png"
+  },
+  {
+   "group": "Brain MRI",
+   "x": -0.138,
+   "y": -0.1663,
+   "thumb": "thumbs/map_19.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.3412,
+   "y": -0.0059,
+   "thumb": "thumbs/map_20.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.145,
+   "y": -0.0674,
+   "thumb": "thumbs/map_21.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.2934,
+   "y": -0.1563,
+   "thumb": "thumbs/map_22.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.3417,
+   "y": 0.0063,
+   "thumb": "thumbs/map_23.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.2574,
+   "y": -0.0042,
+   "thumb": "thumbs/map_24.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.2473,
+   "y": -0.0761,
+   "thumb": "thumbs/map_25.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.232,
+   "y": 0.0281,
+   "thumb": "thumbs/map_26.png"
+  },
+  {
+   "group": "Pathology",
+   "x": -0.0809,
+   "y": -0.121,
+   "thumb": "thumbs/map_27.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.0854,
+   "y": -0.5069,
+   "thumb": "thumbs/map_28.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.1268,
+   "y": -0.3773,
+   "thumb": "thumbs/map_29.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.0486,
+   "y": -0.5035,
+   "thumb": "thumbs/map_30.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.0562,
+   "y": -0.4874,
+   "thumb": "thumbs/map_31.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.1657,
+   "y": -0.5318,
+   "thumb": "thumbs/map_32.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.0646,
+   "y": -0.5607,
+   "thumb": "thumbs/map_33.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.0848,
+   "y": -0.4703,
+   "thumb": "thumbs/map_34.png"
+  },
+  {
+   "group": "Retina",
+   "x": -0.1114,
+   "y": -0.501,
+   "thumb": "thumbs/map_35.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3204,
+   "y": 0.4653,
+   "thumb": "thumbs/map_36.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3698,
+   "y": 0.383,
+   "thumb": "thumbs/map_37.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.312,
+   "y": 0.4696,
+   "thumb": "thumbs/map_38.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3282,
+   "y": 0.44,
+   "thumb": "thumbs/map_39.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.4037,
+   "y": 0.3673,
+   "thumb": "thumbs/map_40.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3869,
+   "y": 0.3812,
+   "thumb": "thumbs/map_41.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3971,
+   "y": 0.3353,
+   "thumb": "thumbs/map_42.png"
+  },
+  {
+   "group": "Ultrasound",
+   "x": -0.3962,
+   "y": 0.3685,
+   "thumb": "thumbs/map_43.png"
+  }
+ ],
+ "text_points": [
+  {
+   "text": "a chest x-ray image",
+   "x": 0.09,
+   "y": 0.0904
+  },
+  {
+   "text": "a chest ct image",
+   "x": 0.0603,
+   "y": 0.129
+  },
+  {
+   "text": "a brain mri image",
+   "x": -0.1896,
+   "y": 0.005
+  },
+  {
+   "text": "a pathology image",
+   "x": -0.1366,
+   "y": 0.0222
+  },
+  {
+   "text": "a retina image",
+   "x": -0.2327,
+   "y": -0.2749
+  },
+  {
+   "text": "a ultrasound image",
+   "x": -0.1942,
+   "y": 0.1762
+  }
+ ]
+}

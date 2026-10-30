@@ -1,0 +1,28 @@
+{
+ "provenance": {
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "model_source": "https://huggingface.co/microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "logit_scale": 85.232,
+  "device": "NVIDIA RTX PRO 4000 Blackwell",
+  "torch": "2.11.0+cu128",
+  "run_date": "2026-10-30",
+  "script": "notebook/run_biomedclip.py",
+  "note": "Scores are cosine similarities between normalised embeddings. They are not probabilities and not diagnoses."
+ },
+ "task": "Cardiomegaly vs normal, zero-shot, same images as biomedclip_cxr_roc.json",
+ "auroc": {
+  "original": 0.902,
+  "darker (gamma 1.6)": 0.892,
+  "lower contrast (\u00d70.6)": 0.879,
+  "blurred (radius 3)": 0.861,
+  "low resolution (64 px)": 0.846
+ },
+ "examples": {
+  "original": "thumbs/shift_0.png",
+  "darker (gamma 1.6)": "thumbs/shift_1.png",
+  "lower contrast (\u00d70.6)": "thumbs/shift_2.png",
+  "blurred (radius 3)": "thumbs/shift_3.png",
+  "low resolution (64 px)": "thumbs/shift_4.png"
+ },
+ "note": "Changes applied in software to imitate differences between scanners or settings; not real other-hospital data."
+}
