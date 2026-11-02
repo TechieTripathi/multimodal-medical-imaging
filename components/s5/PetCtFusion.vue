@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { useBinary } from '../../composables/useBinary'
+import { rafThrottle } from '../../composables/raf'
 import ctUrl from '../../data/imaging/petct/ct_hu.bin?url'
 import suvUrl from '../../data/imaging/petct/suv_x100.bin?url'
 import lesion from '../../data/imaging/petct/lesion_edge.png'
@@ -40,7 +41,7 @@ function draw() {
   }
   g.putImageData(img, 0, 0)
 }
-watch([ct, suv, cv, alpha, step], draw, { flush: 'post' })
+watch([ct, suv, cv, alpha, step], rafThrottle(draw), { flush: 'post' })
 const at = ref<{ x: number, y: number } | null>(null)
 const probe = computed(() => {
   if (!ct.value || !suv.value || !at.value) return null

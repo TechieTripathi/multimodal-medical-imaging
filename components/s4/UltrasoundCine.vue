@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { type Dicom, loadDicom } from '../../composables/dicom'
 import { drawRGB, pub } from '../../composables/draw'
+import { rafThrottle } from '../../composables/raf'
 import manifest from '../../data/imaging/dicom_examples/manifest.json'
 
 // Slide — ultrasound DICOM is a video: one multi-frame file, frame timing read from its tags.
@@ -13,7 +14,7 @@ const frame = ref(0)
 const cv = ref<HTMLCanvasElement>()
 const info = (manifest.files as any[]).find(f => f.file === 'us-liver-ceus.dcm')
 onMounted(async () => { d.value = await loadDicom(pub('dicom/us-liver-ceus.dcm')) })
-watch([d, frame, cv], () => { if (d.value && cv.value) drawRGB(cv.value, d.value.frame(frame.value) as Uint8Array, d.value.cols, d.value.rows) }, { flush: 'post' })
+watch([d, frame, cv], rafThrottle(() => { if (d.value && cv.value) drawRGB(cv.value, d.value.frame(frame.value) as Uint8Array, d.value.cols, d.value.rows) }), { flush: 'post' })
 let timer: ReturnType<typeof setTimeout> | null = null
 function play() {
   if (!d.value) return

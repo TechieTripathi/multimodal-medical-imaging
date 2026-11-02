@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { useBinary } from '../../composables/useBinary'
+import { rafThrottle } from '../../composables/raf'
 import volUrl from '../../data/imaging/ct/volume_u8.bin?url'
 import meta from '../../data/imaging/ct/meta.json'
 import dmeta from '../../data/imaging/dicom/meta.json'
@@ -32,7 +33,7 @@ function draw() {
   paint(cS.value, Y, Z, (r, k) => at(Z - 1 - r, k, x))
   stackCv.value.forEach((c, i) => paint(c, X, Y, (r, k) => at(stackZ[i], r, k)))
 }
-watch([buf, pos, step, cA], draw, { deep: true, flush: 'post' })
+watch([buf, pos, step, cA], rafThrottle(draw), { deep: true, flush: 'post' })
 const files = dmeta.ct_file_order.slice(0, 5)
 const sorted = [...dmeta.ct_file_order].sort((a, b) => b.z - a.z).slice(0, 5)
 const clickAxial = (e: MouseEvent) => { const r = (e.currentTarget as HTMLElement).getBoundingClientRect(); pos.value = [pos.value[0], Math.floor(((e.clientY - r.top) / r.height) * Y), Math.floor(((e.clientX - r.left) / r.width) * X)] }

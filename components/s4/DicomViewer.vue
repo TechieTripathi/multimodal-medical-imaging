@@ -3,6 +3,7 @@ import { computed, ref, shallowRef, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { type Dicom, loadDicom } from '../../composables/dicom'
 import { drawGrey, drawRGB, percentileWindow, pub } from '../../composables/draw'
+import { rafThrottle } from '../../composables/raf'
 import manifest from '../../data/imaging/dicom_examples/manifest.json'
 
 // Artifact 25 — a real DICOM viewer in the slide. Each click opens the next real file (teaching copies
@@ -17,6 +18,8 @@ const err = ref('')
 const frame = ref(0)
 const level = ref(0)
 const width = ref(1)
+// Slider ranges are fixed for each file (from its actual values), so the thumb follows the pointer
+const range = ref({ lo: 0, hi: 1 })
 const cv = ref<HTMLCanvasElement>()
 const credit = computed(() => (manifest.files as any[]).find(f => f.file === name.value)?.credit ?? 'Your own file, read in this browser only')
 
@@ -27,6 +30,10 @@ async function open(src: string | File, label: string) {
     name.value = label
     frame.value = 0
     if (!x.rgb) {
+      const v0 = x.frame(0) as Float32Array
+      let lo = Infinity, hi = -Infinity
+      for (let k = 0; k < v0.length; k++) { if (v0[k] < lo) lo = v0[k]; if (v0[k] > hi) hi = v0[k] }
+      range.value = { lo, hi }
       const isCT = x.str('Modality') === 'CT'
       const wc = x.num('WindowCenter'), ww = x.num('WindowWidth')
       const w = isCT && wc !== undefined && ww ? { level: wc, width: ww } : percentileWindow(x.frame(0) as Float32Array)
@@ -45,7 +52,7 @@ function draw() {
   if (x.rgb) drawRGB(cv.value, x.frame(frame.value) as Uint8Array, x.cols, x.rows)
   else drawGrey(cv.value, x.frame(frame.value) as Float32Array, x.cols, x.rows, level.value, width.value, x.monochrome1 || pet.value)
 }
-watch([d, frame, level, width, cv], draw, { flush: 'post' })
+watch([d, frame, level, width, cv], rafThrottle(draw), { flush: 'post' })
 const rows = computed(() => {
   const x = d.value
   if (!x) return []
@@ -77,8 +84,8 @@ const pick = (e: Event) => { const f = (e.target as HTMLInputElement).files?.[0]
         <template v-for="[k, v] in rows" :key="k"><dt>{{ k }}</dt><dd>{{ v }}</dd></template>
       </dl>
       <template v-if="d && !d.rgb">
-        <label class="ctl">Level <input v-model.number="level" type="range" :min="level - width * 2" :max="level + width * 2" :step="width / 100" @keydown.stop></label>
-        <label class="ctl">Width <input v-model.number="width" type="range" :min="width / 10" :max="width * 4" :step="width / 100" @keydown.stop></label>
+        <label class="ctl">Level <input v-model.number="level" type="range" :min="range.lo" :max="range.hi" :step="(range.hi - range.lo) / 400" @keydown.stop></label>
+        <label class="ctl">Width <input v-model.number="width" type="range" :min="(range.hi - range.lo) / 100" :max="(range.hi - range.lo) * 1.2" :step="(range.hi - range.lo) / 400" @keydown.stop></label>
       </template>
       <label v-if="d && d.frames > 1" class="ctl">Frame <input v-model.number="frame" type="range" min="0" :max="d.frames - 1" @keydown.stop> {{ frame + 1 }} / {{ d.frames }}</label>
       <div class="files">

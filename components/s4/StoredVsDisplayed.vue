@@ -49,9 +49,15 @@ const what = (hu: number) => hu < -900 ? 'air' : hu < -400 ? 'lung' : hu < -50 ?
       </p>
       <p class="rv" :class="{ on: step >= 1 }">The file says how: <span class="mono">RescaleSlope {{ slope }}</span>, <span class="mono">RescaleIntercept {{ intercept }}</span></p>
       <div v-if="step >= 2" class="wrong rv on">
-        <img :src="tagWin" alt="X-ray shown with its own window tags: almost all white">
-        <img :src="good" alt="The same X-ray with a sensible window">
-        <p>Our X-ray’s own window tags (<span class="mono">{{ meta.dx_window_tags.join(' / ') }}</span>) look copied from a CT: applied as written, the image turns white. Metadata can be wrong.</p>
+        <figure>
+          <img :src="tagWin" alt="X-ray shown with its own window tags: almost all white">
+          <figcaption class="bad">Window from the file’s tags: all white</figcaption>
+        </figure>
+        <figure>
+          <img :src="good" alt="The same X-ray with a sensible window">
+          <figcaption>A sensible window</figcaption>
+        </figure>
+        <p>The X-ray’s own window tags (<span class="mono">{{ meta.dx_window_tags.join(' / ') }}</span>) look copied from a CT. Metadata can be wrong.</p>
       </div>
     </div>
   </div>
@@ -65,7 +71,10 @@ canvas { width: 100%; height: 100%; display: block; border-radius: var(--radius)
 .side p { font-size: var(--fs-label); margin: 0 0 14px; }
 .readout { font-size: var(--fs-body) !important; }
 .readout strong { color: var(--accent); }
-.wrong { display: grid; grid-template-columns: 110px 110px 1fr; gap: 10px; align-items: center; margin-top: 12px; }
+.wrong { display: grid; grid-template-columns: 110px 110px 1fr; gap: 10px; align-items: start; margin-top: 12px; }
+.wrong figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
 .wrong img { width: 110px; height: 110px; border-radius: 4px; border: 1px solid var(--rule-strong); }
+.wrong figcaption { font-size: 14px; line-height: 1.2; color: var(--ink-2); }
+.wrong figcaption.bad { color: var(--bad); font-weight: 600; }
 .wrong p { font-size: 16px !important; margin: 0 !important; }
 </style>

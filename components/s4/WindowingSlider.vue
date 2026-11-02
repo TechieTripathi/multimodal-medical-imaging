@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { useBinary } from '../../composables/useBinary'
+import { rafThrottle } from '../../composables/raf'
 import huUrl from '../../data/imaging/ct/slice_hu.bin?url'
 
 // Artifact 14 — CT windowing on the real Hounsfield values of our patient's slice. The window
@@ -42,7 +43,7 @@ function draw() {
   }
   g.putImageData(img, 0, 0)
 }
-watch([buf, cv, level, width], draw, { flush: 'post' })
+watch([buf, cv, level, width], rafThrottle(draw), { flush: 'post' })
 const HW = 420
 const hx = (hu: number) => ((hu - LO) / (HI - LO)) * HW
 </script>

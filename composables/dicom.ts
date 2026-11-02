@@ -35,7 +35,7 @@ export interface Dicom {
   frames: number
   rgb: boolean
   monochrome1: boolean
-  /** Frame i: greyscale values after rescale slope/intercept (Float32Array), or RGB bytes (Uint8Array). */
+  /** Frame i: greyscale values after rescale slope/intercept (Float32Array), or RGB bytes (Uint8Array). Decoded once, then cached. */
   frame: (i: number) => Float32Array | Uint8Array
   bytes: number
 }
@@ -77,7 +77,15 @@ export async function loadDicom(src: string | ArrayBuffer | Blob): Promise<Dicom
   const px = ds.elements[TAGS.PixelData]
   if (!px) throw new Error('No pixel data in this file')
   const perFrame = rows * cols * spp * (bitsA / 8)
+  const cache = new Map<number, Float32Array | Uint8Array>()
   const frame = (i: number) => {
+    const hit = cache.get(i)
+    if (hit) return hit
+    const f = decode(i)
+    cache.set(i, f)
+    return f
+  }
+  const decode = (i: number) => {
     const start = px.dataOffset + i * perFrame
     const slice = buf.slice(start, start + perFrame)
     if (spp === 3) return new Uint8Array(slice)

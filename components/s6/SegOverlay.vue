@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import { useBinary } from '../../composables/useBinary'
+import { rafThrottle } from '../../composables/raf'
 import volUrl from '../../data/imaging/ct/volume_u8.bin?url'
 import labUrl from '../../data/imaging/ct/labels_u8.bin?url'
 import meta from '../../data/imaging/ct/meta.json'
@@ -38,7 +39,7 @@ function draw() {
   }
   g.putImageData(img, 0, 0)
 }
-watch([vol, lab, cv, shown, z, alpha], draw, { flush: 'post' })
+watch([vol, lab, cv, shown, z, alpha], rafThrottle(draw), { flush: 'post' })
 </script>
 
 <template>
