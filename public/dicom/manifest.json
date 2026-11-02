@@ -230,5 +230,47 @@
    "title": "CT slice from the same PET/CT",
    "credit": "FDG-PET-CT-Lesions (TCIA) \u00b7 CC BY 4.0"
   }
+ ],
+ "segs": [
+  {
+   "file": "seg-lidc-0001-reader1.dcm",
+   "reader": 1,
+   "voxels": 5905,
+   "volume_mm3": 7298.4,
+   "mean_hu_on_ct_slice": 4.81,
+   "longest_diameter_on_ct_slice_mm": 31.08
+  },
+  {
+   "file": "seg-lidc-0001-reader2.dcm",
+   "reader": 2,
+   "voxels": 4613,
+   "volume_mm3": 5701.5,
+   "mean_hu_on_ct_slice": 31.11,
+   "longest_diameter_on_ct_slice_mm": 31.64
+  },
+  {
+   "file": "seg-lidc-0001-reader3.dcm",
+   "reader": 3,
+   "voxels": 4955,
+   "volume_mm3": 6124.2,
+   "mean_hu_on_ct_slice": 26.63,
+   "longest_diameter_on_ct_slice_mm": 30.43
+  },
+  {
+   "file": "seg-lidc-0001-reader4.dcm",
+   "reader": 4,
+   "voxels": 5498,
+   "volume_mm3": 6795.3,
+   "mean_hu_on_ct_slice": 27.97,
+   "longest_diameter_on_ct_slice_mm": 31.77
+  },
+  {
+   "file": "seg-fdg-lung-slice.dcm",
+   "pet_slice_lesion_pixels": 453,
+   "suv_max": 14.195,
+   "suv_mean": 3.382,
+   "background_suv_mean": 0.795,
+   "area_cm2": 18.79
+  }
  ]
 }

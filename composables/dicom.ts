@@ -7,11 +7,11 @@ import dicomParser from 'dicom-parser'
 export const TAGS: Record<string, string> = {
   TransferSyntaxUID: 'x00020010', SOPClassUID: 'x00080016', StudyDate: 'x00080020', SeriesTime: 'x00080031',
   Modality: 'x00080060', Manufacturer: 'x00080070', SeriesDescription: 'x0008103e', ManufacturerModelName: 'x00081090',
-  DerivationDescription: 'x00082111', PatientName: 'x00100010', PatientID: 'x00100020', PatientAge: 'x00101010',
+  DerivationDescription: 'x00082111', PatientName: 'x00100010', PatientID: 'x00100020', PatientBirthDate: 'x00100030', AccessionNumber: 'x00080050', PatientAge: 'x00101010',
   PatientWeight: 'x00101030', PatientIdentityRemoved: 'x00120062', BodyPartExamined: 'x00180015',
   Radiopharmaceutical: 'x00180031', SliceThickness: 'x00180050', KVP: 'x00180060', FrameTime: 'x00181063',
   RadiopharmaceuticalStartTime: 'x00181072', RadionuclideTotalDose: 'x00181074', RadionuclideHalfLife: 'x00181075',
-  ImagerPixelSpacing: 'x00181164', ViewPosition: 'x00185101', ImagePositionPatient: 'x00200032',
+  ImagerPixelSpacing: 'x00181164', ViewPosition: 'x00185101', ImagePositionPatient: 'x00200032', ImageOrientationPatient: 'x00200037',
   ImageLaterality: 'x00200062', SamplesPerPixel: 'x00280002', PhotometricInterpretation: 'x00280004',
   PlanarConfiguration: 'x00280006', NumberOfFrames: 'x00280008', Rows: 'x00280010', Columns: 'x00280011',
   PixelSpacing: 'x00280030', BitsAllocated: 'x00280100', BitsStored: 'x00280101', PixelRepresentation: 'x00280103',
@@ -115,4 +115,76 @@ export function suvFactor(d: Dicom) {
   const dt = secs(series) - secs(start)
   const doseNow = dose * 2 ** (-dt / half)
   return { factor: (weight * 1000) / doseNow, minutes: dt / 60, doseNowMBq: doseNow / 1e6, weight, doseMBq: dose / 1e6, halfLifeMin: half / 60, start, series }
+}
+
+// ---------------------------------------------------------------- DICOM SEG (binary segmentations)
+
+const SEG_TAGS = {
+  Shared: 'x52009229', PerFrame: 'x52009230', PixelMeasures: 'x00289110', PlanePosition: 'x00209113',
+  PlaneOrientation: 'x00209116', IPP: 'x00200032', IOP: 'x00200037', PixelSpacing: 'x00280030',
+  SliceThickness: 'x00180050', SpacingBetweenSlices: 'x00180088',
+}
+
+export interface Seg {
+  rows: number
+  cols: number
+  /** Each frame: position of its first pixel (mm) and its 0/1 mask. */
+  frames: { ipp: number[], mask: Uint8Array }[]
+  spacing: [number, number]
+  sliceMM: number
+  /** Unit vectors along a row and down a column, in patient space. */
+  rowDir: number[]
+  colDir: number[]
+  /** All frames' pixels set, and volume in mm³. */
+  voxels: number
+  volumeMM3: number
+  /** The mask resampled onto one slice of another image (nearest pixel), or null if no frame is there. */
+  on: (img: Dicom) => Uint8Array | null
+}
+
+const vec = (s: string | undefined) => (s ?? '').split('\\').map(Number)
+
+export async function loadSeg(src: string | ArrayBuffer | Blob): Promise<Seg> {
+  const buf = typeof src === 'string' ? await (await fetch(src)).arrayBuffer() : src instanceof ArrayBuffer ? src : await src.arrayBuffer()
+  const ds = dicomParser.parseDicom(new Uint8Array(buf))
+  const rows = ds.uint16(TAGS.Rows), cols = ds.uint16(TAGS.Columns)
+  if (ds.uint16(TAGS.BitsAllocated) !== 1) throw new Error('Only binary (1-bit) SEG is supported')
+  const shared = ds.elements[SEG_TAGS.Shared].items[0].dataSet
+  const pm = shared.elements[SEG_TAGS.PixelMeasures].items[0].dataSet
+  const spacing = vec(pm.string(SEG_TAGS.PixelSpacing)) as [number, number]
+  const sliceMM = Number(pm.string(SEG_TAGS.SpacingBetweenSlices) ?? pm.string(SEG_TAGS.SliceThickness))
+  const iop = vec(shared.elements[SEG_TAGS.PlaneOrientation].items[0].dataSet.string(SEG_TAGS.IOP))
+  const px = ds.elements[TAGS.PixelData]
+  const bits = new Uint8Array(buf, px.dataOffset, px.length)
+  const per = rows * cols
+  let voxels = 0
+  const frames = ds.elements[SEG_TAGS.PerFrame].items.map((it: any, f: number) => {
+    const ipp = vec(it.dataSet.elements[SEG_TAGS.PlanePosition].items[0].dataSet.string(SEG_TAGS.IPP))
+    const mask = new Uint8Array(per)
+    for (let i = 0; i < per; i++) {
+      const b = f * per + i
+      mask[i] = (bits[b >> 3] >> (b & 7)) & 1   // DICOM packs 1-bit pixels least-significant bit first
+      voxels += mask[i]
+    }
+    return { ipp, mask }
+  })
+  const rowDir = iop.slice(0, 3), colDir = iop.slice(3, 6)
+  const on = (img: Dicom) => {
+    const ipp = img.nums('ImagePositionPatient'), o = vec(img.str('ImageOrientationPatient') ?? '1\\0\\0\\0\\1\\0')
+    const sp = img.nums('PixelSpacing')
+    const fr = frames.find(f => Math.abs(f.ipp[2] - ipp[2]) < sliceMM / 2)
+    if (!fr) return null
+    const out = new Uint8Array(img.rows * img.cols)
+    const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+    for (let r = 0; r < img.rows; r++) {
+      for (let c = 0; c < img.cols; c++) {
+        // patient position of this image pixel, then the SEG pixel at that position
+        const p = [0, 1, 2].map(k => ipp[k] + c * o[k] * sp[1] + r * o[k + 3] * sp[0] - fr.ipp[k])
+        const sc = Math.round(dot(p, rowDir) / spacing[1]), sr = Math.round(dot(p, colDir) / spacing[0])
+        if (sr >= 0 && sc >= 0 && sr < rows && sc < cols) out[r * img.cols + c] = fr.mask[sr * cols + sc]
+      }
+    }
+    return out
+  }
+  return { rows, cols, frames, spacing, sliceMM, rowDir, colDir, voxels, volumeMM3: voxels * spacing[0] * spacing[1] * sliceMM, on }
 }

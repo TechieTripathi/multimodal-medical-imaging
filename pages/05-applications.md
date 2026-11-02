@@ -40,7 +40,7 @@ sources: [demnerfushman2016iu, zhang2025biomedclip, tiu2022chexzero]
 </AppCase>
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Apply zero-shot matching to chest X-rays, with one real success and one real failure.
 **Say:** The scenario: X-rays waiting overnight for a report. [click] A CLIP-style model compares each image with descriptions of common findings, as CheXzero does. [click] Out comes a ranked list, which could reorder the reading queue. [click] The benefit: an obviously enlarged heart can be seen sooner. [click] The limit, from our own run: on the left the model's top match agreed with the report; on the right, an X-ray reported as showing pleural effusions came out as "normal". Across 1,262 X-rays with a single finding, its top choice matched 90% of the normal reports but only 7 of 25 enlarged hearts. It mostly says "normal".
 **Example:** Triage, not diagnosis: deciding the order of reading, not the result.
@@ -229,7 +229,7 @@ sources: [jin2022fives, zhang2025biomedclip]
 </style>
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show a strong application area and a clear failure of zero-shot use.
 **Say:** Diabetic eye disease can be caught with a simple photograph. [click] AI can outline the vessels, as this expert did by hand, and look for damage. [click] The output is a vessel map and a referral grade. [click] This is valuable where eye specialists are scarce. [click] But a general model is not enough. We asked BiomedCLIP, zero-shot, to tell apart four diagnoses in 200 photographs: 27% correct, where guessing scores 25%. It has not learned retinal disease from its training data.
 **Example:** Dedicated retinal models trained on graded photographs are what is used in screening programmes.

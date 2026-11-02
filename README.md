@@ -1,6 +1,6 @@
 # Multimodal AI Models for Medical Imaging Analysis
 
-A 64-slide, two-hour Faculty Development Program session, built with [Slidev](https://sli.dev) (Vue 3), with a companion Jupyter notebook. The content specification is [IDEA.md](IDEA.md).
+A 66-slide, two-hour Faculty Development Program session, built with [Slidev](https://sli.dev) (Vue 3), with a companion Jupyter notebook. The content specification is [IDEA.md](IDEA.md).
 
 The deck follows one real, de-identified patient (LIDC-IDRI-0001: a chest CT, a chest X-ray and four radiologists' outlines and ratings) through image representation, DICOM, models, demonstrations and responsible use. Every visual carries one honesty label: real image, real model output, published result, illustrative, simulated or teaching picture. Every "real model output" comes from a run file in `data/runs/`, produced by the scripts in `notebook/`.
 
@@ -17,7 +17,7 @@ npm run dev            # http://localhost:3030
 
 - Presenter view with speaker notes and timer: `http://localhost:3030/presenter`
 - Advance with → / space / clicker; interactive slides follow the clicker, and their sliders and buttons also work.
-- The dark section openers and the institutional cover are not numbered; the 64 core slides are.
+- The dark section openers and the institutional cover are not numbered; the 66 core slides are.
 
 ### Offline delivery
 
@@ -46,7 +46,8 @@ npm run export:notes     # speaker notes
 | Real image assets (derived, small) | `data/imaging/` (built by `notebook/prepare_deck_assets.py`) |
 | Model results shown on slides | `data/runs/*.json` (built by `notebook/run_*.py` and the notebook) |
 | Notebook cells shown on demo slides | `data/notebook/` (built by `notebook/build_notebook.py --extract`) |
-| Real DICOM sample pack (viewer, demos, downloads) | `public/dicom/` (built by `prepare_deck_assets.py dicom_examples`); in-browser reader `composables/dicom.ts` |
+| Real DICOM sample pack (viewer, demos, downloads) | `public/dicom/` (built by `prepare_deck_assets.py dicom_examples`); in-browser reader `composables/dicom.ts` (images and DICOM SEG) |
+| Code that runs on the demo slides (Demo E) | `composables/analyses.ts`: the shown source is exactly what the Run button executes |
 | Sources | `data/refs/*.ts`; list keys in a slide's `sources:` frontmatter |
 | Colours, type sizes | `styles/tokens.css` (series theme, larger type scale) |
 | Honesty label | `tag:` and `tagText:` in a slide's frontmatter; `actual` also needs `run:` |
@@ -56,10 +57,10 @@ Speaker notes are the HTML comment at the end of each slide (Time, Objective, Sa
 ## Checks
 
 ```bash
-npm run check                                       # 64 slides, sections, notes, citation keys, honesty labels, run files, word limits, timing = 120 min
+npm run check                                       # 66 slides, sections, notes, citation keys, honesty labels, run files, word limits, timing = 120 min
 npm run check:urls                                  # every source URL resolves
 node --experimental-strip-types scripts/test-wordpiece.mjs   # in-page tokenizer matches BiomedCLIP's
-node --experimental-strip-types scripts/test-dicom.mjs       # in-browser DICOM reader matches pydicom on every sample file
+node --experimental-strip-types scripts/test-dicom.mjs       # in-browser DICOM reader, SEG reader and Demo E analyses match pydicom
 node scripts/shot.mjs <port> <outDir> 12:0 12:3     # screenshot slides at click states (page numbers include cover and openers)
 node scripts/contact-sheet.mjs <port> <outDir> 1 71 # first and last state of every page
 ```

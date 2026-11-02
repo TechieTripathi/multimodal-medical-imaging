@@ -30,7 +30,7 @@ sources: [zhang2025biomedclip]
 <TrainInfer />
 
 <!--
-**Time:** ~1.5 min
+**Time:** ~1 min
 **Objective:** Separate training from inference.
 **Say:** Training is when the model learns: it sees millions of examples and its internal numbers are adjusted again and again. BiomedCLIP saw 15 million figure–caption pairs. That is done once, by the developer, with a lot of computing power. [click] Inference is what happens when you use it: one new image goes in, the numbers are frozen, an answer comes out in seconds. Everything a model can do at inference time, it learned during training.
 **Example:** Medical school versus a single consultation.
@@ -197,7 +197,7 @@ sources: [tiu2022chexzero, wang2022medclip]
 <CheXzeroCard />
 
 <!--
-**Time:** ~1.5 min
+**Time:** ~1 min
 **Objective:** Show a medical CLIP-style model and what its authors report.
 **Say:** CheXzero tackles the labelling bottleneck. Instead of paying experts to label every X-ray, it learns from the reports radiologists have already written. [click] At use, you give it an X-ray and two prompts, such as "pneumonia" and "no pneumonia", and it scores which fits better. [click] It is trained like CLIP, on pairs of X-rays and reports. [click] The authors report accuracy comparable to radiologists on several findings, and on an external dataset it beat a fully supervised model on three of eight. [click] But it only knows chest X-rays, and performance varies a lot by finding.
 **Example:** It is the same zero-shot idea as slide 20, specialised for chest X-rays.

@@ -3,7 +3,7 @@
 
 **Audience:** Interdisciplinary Faculty Development Program (FDP) participants: AI/CS, medical and radiology, biomedical engineering, and non-technical faculty, plus students
 **Duration:** 120 minutes, including Q&A *(confirm)*
-**Deck size:** 64 numbered core slides (raised from 58 on 2 November 2026 to add real DICOM examples), plus an unnumbered institutional cover and a Sources appendix that do not count toward the total
+**Deck size:** 66 numbered core slides (raised from 58 on 2 November 2026 to add real DICOM examples and runnable DICOM code), plus an unnumbered institutional cover and a Sources appendix that do not count toward the total
 **Format:** 16:9 Slidev presentation built around interactive artifacts (Vue 3 components) and purposeful animation, light theme, speaker notes, a static SPA build for offline delivery, and PDF exports (all click states, handout, speaker notes). Optional PowerPoint export (see §12).
 **Companion:** A runnable Jupyter notebook that produces every real model output shown in the deck
 **Primary goal:** Show how AI systems connect medical images with clinical text and other patient information, how real medical imaging data is stored and prepared, and how to run and interpret real models responsibly.
@@ -56,13 +56,13 @@ By the end, participants should be able to:
 | Section | Slides | Time |
 |---|---:|---:|
 | 1. The medical imaging problem and multimodal AI | 1–8 | 11 min |
-| 2. How multimodal AI works | 9–18 | 19 min |
-| 3. Training, evaluation and representative models | 19–28 | 17 min |
+| 2. How multimodal AI works | 9–18 | 18 min |
+| 3. Training, evaluation and representative models | 19–28 | 16 min |
 | 4. DICOM fundamentals and imaging workflows | 29–40 | 22 min |
-| 5. Medical-domain applications | 41–49 | 15 min |
-| 6. Practical demonstrations | 50–59 | 23 min |
-| 7. Responsible AI, research and takeaways | 60–64 | 13 min |
-| **Total** | **64 slides** | **120 min** |
+| 5. Medical-domain applications | 41–49 | 14 min |
+| 6. Practical demonstrations | 50–61 | 26 min |
+| 7. Responsible AI, research and takeaways | 62–66 | 13 min |
+| **Total** | **66 slides** | **120 min** |
 
 Slide numbers in §7 below are the original 58-slide plan; the six DICOM slides were inserted in Parts 4–6 (see §12, decisions).
 
@@ -511,6 +511,7 @@ Prioritize original papers, peer-reviewed publications, official model repositor
 - **Report generation was not run.** MedGemma's download is gated by terms that only the account holder can accept; Artifact 23 and slide 27 use clearly labelled simulated text, checked against the patient's real evidence.
 - **Brain MRI:** UPENN-GBM-00001 (CC BY 4.0), four sequences rigidly registered in the notebook; slice chosen by eye through the lesion.
 - **Real DICOM examples (2 November 2026).** Six slides added (deck now 64, still 120 minutes): a live DICOM viewer (Artifact 25), ultrasound cine, mammogram tags with the clinical table, PET SUV from tags (Part 4); PET/CT fusion (Artifact 26, Part 5); Demo D (Part 6). New data, all CC BY 4.0 from TCIA: CMMD (mammography, patient D2-0333), B-mode-and-CEUS-Liver (ultrasound cine, LiverUS-01), FDG-PET-CT-Lesions defaced release (lung cancer patient PETCT_b899150306). Seven teaching copies in `public/dicom/` form the downloadable sample pack; `scripts/test-dicom.mjs` checks the in-browser reader against pydicom.
+- **Runnable DICOM code (Demo E, slides 59–60).** A Run button executes the code shown on the slide against the real files in the browser: CT tissue composition from Hounsfield units, the four readers' nodule measurements from DICOM SEG, PET tumour SUV statistics, and a metadata audit. Five SEG teaching copies added to the pack; every number is checked against pydicom.
 
 ### Project organization
 

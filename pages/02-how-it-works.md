@@ -248,7 +248,7 @@ sources: [huang2020fusion]
 <FusionBuilder />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Distinguish early, intermediate and late fusion and their trade-offs.
 **Say:** There are three broad places to combine modalities. Early fusion joins the raw inputs and trains one model on everything. [click] Intermediate fusion gives each input its own encoder, then joins the fingerprints; this is what most modern systems do. [click] Late fusion trains separate models and only combines their answers, for example by voting.
 **Example:** Early fusion is one doctor reading everything at once; late fusion is three specialists who never talk, each casting a vote.
@@ -274,7 +274,7 @@ sources: [huang2020fusion]
 <StructuredData />
 
 <!--
-**Time:** ~1.5 min
+**Time:** ~1 min
 **Objective:** Show how structured clinical data enters a model, and why missing values are the central problem.
 **Say:** Lab results and history are already numbers, but they need preparing. [click] Each is scaled to a similar range so no single value dominates. [click] And many are simply missing: the blood test was not done, the earlier scan is unknown. A careful model is told explicitly what is missing, with a separate flag, rather than being fed a silent zero. [click] Then the record joins the image fingerprint and the model learns from both.
 **Example:** A zero for a blood test that was never taken is not the same as a measured zero.

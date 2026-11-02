@@ -6,7 +6,7 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 
 | Check | Result |
 |---|---|
-| Core slides | 64, in 7 sections (8 / 10 / 10 / 12 / 9 / 10 / 5), plus an unnumbered cover, 7 unnumbered section openers and a 5-page Sources appendix |
+| Core slides | 66, in 7 sections (8 / 10 / 10 / 12 / 9 / 12 / 5), plus an unnumbered cover, 7 unnumbered section openers and a 5-page Sources appendix |
 | Timing | Speaker-note times sum to exactly 120 min; every section matches its budget |
 | Speaker notes | On every slide; demo slides add Steps, Expected observations, Likely failure modes, Fallback |
 | Honesty labels | One per slide where a visual needs it; every "Real model output" label points to a run file that exists (checked by script) |
@@ -19,7 +19,7 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 ## Tests performed
 
 1. **Static checks** (`npm run check`): slide count, sections, notes, placeholders, citation keys, honesty tags, run files, word limit (no slide over the limit), timing.
-2. **DICOM reader** (`scripts/test-dicom.mjs`): the in-browser reader (`composables/dicom.ts`, dicom-parser) matches pydicom on all 7 sample files: tags, pixel min/max/mean after rescale, and the PET SUV factor. Privacy gate in `prepare_deck_assets.py`: identifying tags empty, private tags removed; every image inspected for burned-in text (ultrasound header band blacked out).
+2. **DICOM reader** (`scripts/test-dicom.mjs`): the in-browser reader (`composables/dicom.ts`, dicom-parser) matches pydicom on all 7 sample files: tags, pixel min/max/mean after rescale, and the PET SUV factor. The SEG reader matches voxel counts on all 5 SEG files (including one stored bottom-up), and the Demo E analyses reproduce pydicom's nodule volumes, diameters and mean HU per reader and the PET SUVmax, SUVmean and area. Privacy gate in `prepare_deck_assets.py`: identifying tags empty, private tags removed; every image inspected for burned-in text (ultrasound header band blacked out).
 3. **Tokenizer** (`scripts/test-wordpiece.mjs`): the in-page WordPiece tokenizer matches the Hugging Face BiomedBERT tokenizer on 6 sentences, tokens and IDs.
 3. **Links** (`npm run check:urls`): 29 of 34 URLs return 200; the 5 that return 403 are publisher DOI pages (NEJM AI ×2, RSNA, Wiley, Oxford) that block scripts, each confirmed through Crossref.
 4. **Visual review**: every slide screenshotted at its first and last click state (and intermediate states for step-driven artifacts) and inspected; overflow, overlap and clipping fixed.

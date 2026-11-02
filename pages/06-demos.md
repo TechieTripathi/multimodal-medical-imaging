@@ -214,7 +214,7 @@ sources: [wasserthal2023totalseg, lidc2015data]
 <SegOverlay />
 
 <!--
-**Time:** ~2.5 min
+**Time:** ~2 min
 **Objective:** Run whole-CT segmentation and read its output.
 **Say:** TotalSegmentator reads the DICOM folder directly and outlines 117 structures. On this GPU it takes about a minute. [click] The lungs: 3.7 litres. [click] The heart, aorta and airway. [click] The spine, ribs and the top of the liver. Each colour is a real outline from the run, and every volume on the right was measured from it.
 **Example:** Scroll through the slices: the outlines follow the anatomy up and down the chest.
@@ -276,7 +276,7 @@ sources: [gatidis2022fdgpetct, dicomstandard]
 <NotebookCell cell="D3" :lines="[3, 4, 5, 6, 7]" :steps="[[3, 4, 5], [6, 7]]" :out-lines="2" />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Read the sample pack in code, ending with the SUV calculation.
 **Say:** Workflow D in the notebook opens every file in the sample pack and prints the tags that matter for each kind of scanner: units for CT and PET, frames for ultrasound, laterality for the mammogram. This cell is the PET one. [click] It reads the timing and dose from the file. [click] And turns becquerels into SUV. The output matches the slide we saw in Part 4, because it is the same file.
 **Example:** Four lines of arithmetic, but every input comes from the DICOM header.
@@ -288,6 +288,68 @@ sources: [gatidis2022fdgpetct, dicomstandard]
 **Likely failure modes:** Running from another folder: the pack is at ../public/dicom/ relative to the notebook.
 **Fallback:** This slide.
 **Sources:** gatidis2022fdgpetct; dicomstandard.
+-->
+
+---
+section: 6
+layout: artifact
+clicks: 2
+tag: actual
+tagText: 'code run in this page on real DICOM files'
+run: ../imaging/dicom_examples/manifest.json
+sources: [lidc2015data, fedorov2018lidcdicom, dicomstandard]
+---
+
+::title::
+# Demo E1: run code on a CT, get insights
+
+::default::
+<DicomCodeRun :tasks="['tissue', 'nodule']" />
+
+<!--
+**Time:** ~2 min
+**Objective:** Run real analysis code on real DICOM files and turn numbers into insights.
+**Say:** This panel is code, and the Run button really runs it, here, on our patient's DICOM files. [click] First: what tissue is on this slice? Because CT values are Hounsfield units, simple ranges sort the pixels into lung, fat, soft tissue and bone, and the pixel size from the file turns counts into square centimetres. Lung is almost half of the tissue on this slice. [click] Second: the nodule. The four radiologists' outlines are DICOM SEG files. The code measures each one: volume, longest diameter, mean density. Same nodule, same images, and the volumes differ by about 28%. Reader 1's outline is wider and takes in more lung, so its mean density is much lower.
+**Example:** This is what "quantitative imaging" means: measurements that come straight from the stored units and geometry.
+**Try / Notice:** Press Run again or switch tabs; the time in brackets is how long the code took in this browser.
+**Ask:** Which reader's volume would you report, and why?
+**Caveat:** Tissue bands are rough Hounsfield ranges, and contrast-filled vessels (100 to 300 HU) are not counted. The analyses are checked against pydicom by scripts/test-dicom.mjs.
+**Steps:** Press Run on each tab (or use the clicker).
+**Expected observations:** Lung 332 cm², about 47% of tissue; reader volumes 5.7 to 7.3 cm³, longest diameters 30 to 32 mm, mean density 5 to 31 HU.
+**Likely failure modes:** None offline; the files are bundled with the deck.
+**Fallback:** The expected numbers above.
+**Sources:** lidc2015data; fedorov2018lidcdicom — the reader outlines (DICOM SEG); dicomstandard.
+-->
+
+---
+section: 6
+layout: artifact
+clicks: 2
+tag: actual
+tagText: 'code run in this page on real DICOM files'
+run: ../imaging/dicom_examples/manifest.json
+sources: [gatidis2022fdgpetct, boellaard2015petguideline, dicomstandard]
+---
+
+::title::
+# Demo E2: run code on PET, then audit every file
+
+::default::
+<DicomCodeRun :tasks="['pet', 'audit']" />
+
+<!--
+**Time:** ~2 min
+**Objective:** Compute tumour statistics from PET DICOM, and audit metadata across modalities.
+**Say:** [click] The PET file's own tags convert its pixels to SUV; the expert outline, a DICOM SEG, picks out the tumour. On this slice: SUV max 14, mean 3.4, an area of about 19 square centimetres, and a tumour-to-background ratio of about 4: the tumour takes up four times more sugar than the surrounding tissue. [click] Second: an audit. The code opens every file and checks what it says about identity and geometry. All six were de-identified. But two of them, the X-ray and the ultrasound, record no pixel size, so nothing in them can be measured in millimetres. You only find this by checking.
+**Example:** Before training a model on thousands of files, an audit like this catches missing or inconsistent tags.
+**Try / Notice:** Press Run again; switch between tabs.
+**Ask:** What else would you check in an audit before using a dataset?
+**Caveat:** Background SUV here is all body tissue on this slice outside the tumour; clinical protocols use defined reference regions such as the liver or blood pool.
+**Steps:** Press Run on each tab (or use the clicker).
+**Expected observations:** SUVmax 14.2, SUVmean 3.4, area 18.8 cm², ratio about 4.3; audit: identity removed for all six, pixel size missing for DX and US.
+**Likely failure modes:** None offline.
+**Fallback:** The expected numbers above.
+**Sources:** gatidis2022fdgpetct; boellaard2015petguideline — SUV and reference regions; dicomstandard.
 -->
 
 ---

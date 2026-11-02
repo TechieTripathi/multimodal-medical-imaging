@@ -519,6 +519,35 @@ def write_teaching_copy(ds, pixels, name, changes, doi, scale=1):
     return path
 
 
+def write_seg_copy(ds, frame_index, name, changes, doi):
+    """A DICOM SEG teaching copy: private tags removed, new UID, change recorded; optionally keep only
+    one frame (1-bit pixels re-packed in DICOM's little-endian bit order)."""
+    from pydicom.sequence import Sequence
+    from pydicom.uid import ExplicitVRLittleEndian, generate_uid
+    ds = ds.copy()
+    ds.remove_private_tags()
+    if frame_index is not None:
+        frame = ds.pixel_array[frame_index].astype(np.uint8)
+        ds.PerFrameFunctionalGroupsSequence = Sequence([ds.PerFrameFunctionalGroupsSequence[frame_index]])
+        ds.NumberOfFrames = 1
+        ds.PixelData = np.packbits(frame.ravel(), bitorder='little').tobytes()
+    uid = generate_uid()
+    ds.SOPInstanceUID = uid
+    ds.file_meta.MediaStorageSOPInstanceUID = uid
+    ds.file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+    ds.DerivationDescription = f'Teaching copy for an FDP slide deck: {changes}. Source https://doi.org/{doi} (CC BY).'[:1024]
+    ds.save_as(os.path.join(DICOM_OUT, name), enforce_file_format=True)
+
+
+def longest_diameter(mask, spacing):
+    """Longest in-plane distance (mm) across the mask, on the slice where it is largest."""
+    k = int(np.argmax(mask.sum(axis=(1, 2))))
+    ys, xs = np.nonzero(mask[k])
+    p = np.stack([xs * spacing[0], ys * spacing[1]], 1)
+    d = np.sqrt(((p[:, None, :] - p[None, :, :]) ** 2).sum(-1))
+    return float(d.max())
+
+
 def block_mean(a, f):
     """Downsample the first two (spatial) axes of `a` by an integer factor `f` by averaging."""
     h, w = (a.shape[0] // f) * f, (a.shape[1] // f) * f
@@ -700,10 +729,38 @@ def stage_dicom_examples():
                      'series_time': str(ds.SeriesTime), 'units': str(ds.Units), 'decay_correction': str(ds.DecayCorrection),
                      'radiopharmaceutical': str(ds.RadiopharmaceuticalInformationSequence[0].Radiopharmaceutical)}}
     json.dump(meta, open(out('petct', 'meta.json'), 'w'), indent=1)
+
+    # Segmentation objects (DICOM SEG) for the code-run demo: the four LIDC readers' nodule outlines
+    # (unchanged) and, for PET, the lesion frame that matches the PET slice above
+    segs = []
+    lidc_ct, _ = read_ct()
+    hu_k = sitk.GetArrayFromImage(lidc_ct)[k].astype(np.float64)
+    masks = read_reader_masks(lidc_ct)
+    sp = lidc_ct.GetSpacing()
+    for i, d in enumerate(series_dir('SEG')):
+        sd = pydicom.dcmread(glob.glob(os.path.join(d, '*.dcm'))[0])
+        name = f'seg-lidc-0001-reader{i + 1}.dcm'
+        write_seg_copy(sd, None, name, 'private tags removed; outline unchanged', DOI['lidc'])
+        m = masks[i]['mask']
+        segs.append({'file': name, 'reader': i + 1, 'voxels': int(m.sum()), 'volume_mm3': round(float(m.sum() * sp[0] * sp[1] * sp[2]), 1),
+                     'mean_hu_on_ct_slice': round(float(hu_k[m[k]].mean()), 2), 'longest_diameter_on_ct_slice_mm': round(longest_diameter(m[k:k + 1], sp), 2)})
+    sd = pydicom.dcmread(glob.glob(os.path.join(RAW, 'petct', 'SEG', '*.dcm'))[0])
+    zs = [float(f.PlanePositionSequence[0].ImagePositionPatient[2]) for f in sd.PerFrameFunctionalGroupsSequence]
+    fi = int(np.argmin([abs(z - float(ds.ImagePositionPatient[2])) for z in zs]))
+    write_seg_copy(sd, fi, 'seg-fdg-lung-slice.dcm', f'only the frame matching the PET slice at z = {float(ds.ImagePositionPatient[2])} mm kept; private tags removed', DOI['petct'])
+    suv_slice = pet_hs[kp].pixel_array * float(pet_hs[kp].RescaleSlope) * factor
+    les = seg_pet[kp] > 0
+    body = (suv_slice > 0.3) & ~les
+    segs.append({'file': 'seg-fdg-lung-slice.dcm', 'pet_slice_lesion_pixels': int(les.sum()), 'suv_max': round(float(suv_slice[les].max()), 3),
+                 'suv_mean': round(float(suv_slice[les].mean()), 3), 'background_suv_mean': round(float(suv_slice[body].mean()), 3),
+                 'area_cm2': round(float(les.sum() * float(pet_hs[kp].PixelSpacing[0]) * float(pet_hs[kp].PixelSpacing[1]) / 100), 2)})
+    for s_ in segs:
+        print('seg:', s_)
+
     json.dump({'note': 'Teaching copies of real DICOM files from public TCIA collections. Each file records its changes in DerivationDescription.',
-               'files': files}, open(os.path.join(DICOM_OUT, 'manifest.json'), 'w'), indent=1)
+               'files': files, 'segs': segs}, open(os.path.join(DICOM_OUT, 'manifest.json'), 'w'), indent=1)
     # The same manifest for the slide components (Vite cannot import from public/)
-    json.dump({'files': files}, open(out('dicom_examples', 'manifest.json'), 'w'), indent=1)
+    json.dump({'files': files, 'segs': segs}, open(out('dicom_examples', 'manifest.json'), 'w'), indent=1)
     for f in files:
         print(f"dicom: {f['file']:28s} {f['bytes'] / 1e6:5.2f} MB  {f['tags'].get('Modality')}  {f['tags'].get('Rows')}x{f['tags'].get('Columns')}  frames {f['tags'].get('NumberOfFrames', 1)}")
     print('petct:', meta['lesion'], 'SUV factor', round(factor, 6))
