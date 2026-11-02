@@ -8,6 +8,7 @@
 | B | Prepare the patient's X-ray from DICOM and match it with descriptions | BiomedCLIP | 0.025 s per image | about 1.2 s per image |
 | C | Outline anatomy (TotalSegmentator) and the nodule (MedSAM); compare with four radiologists | TotalSegmentator, MedSAM | about 1–2.5 min | several minutes (fast mode) |
 | D | Open real DICOM from six kinds of scanner; ultrasound frames; PET SUV from tags; PET/CT fusion | none | seconds | seconds |
+| E | Analyses and insights: CT tissue composition, the four readers' nodule measurements (DICOM SEG), PET tumour SUV statistics, metadata audit | none | seconds | seconds |
 
 Times were measured on an NVIDIA RTX PRO 4000 Blackwell (24 GB) on 30 October 2026; your CPU times will vary.
 
@@ -22,6 +23,12 @@ jupyter lab multimodal-medical-imaging.ipynb
 ```
 
 The first run of each model downloads its weights from Hugging Face or GitHub (BiomedCLIP about 800 MB, MedSAM about 360 MB, TotalSegmentator about 1 GB). On a machine without internet during the session, run the notebook once beforehand.
+
+Workflow E also runs from a terminal, with the same code generated from the notebook cells:
+
+```bash
+python dicom_insights.py all        # or: tissue, nodule, pet, audit; figures are saved in figures/ (add --show to display them)
+```
 
 Workflow D needs no download: it reads the sample pack in `../public/dicom/`. `python download_data.py --dicom` fetches the originals behind it (about 480 MB).
 
@@ -71,7 +78,8 @@ These datasets were de-identified by their publishers. Hospital DICOM files are 
 | `download_data.py` | Downloads the datasets into `data/raw/` |
 | `prepare_deck_assets.py` | Builds the small derived images and arrays in `../data/imaging/` that the slides use |
 | `run_biomedclip.py`, `run_segmentation.py`, `run_cnn_features.py` | Produce the model results in `../data/runs/` that the slides show |
-| `build_notebook.py` | Writes the notebook; `--extract` copies the executed cells shown on the demo slides |
+| `build_notebook.py` | Writes the notebook and `dicom_insights.py`; `--extract` copies the executed cells shown on the demo slides |
+| `dicom_insights.py` | Workflow E as a terminal script (generated; edit the cells in `build_notebook.py`) |
 
 To rebuild everything the slides show:
 

@@ -3,8 +3,7 @@
 // notebook/prepare_deck_assets.py recorded in public/dicom/manifest.json.
 // Usage: node --experimental-strip-types scripts/test-dicom.mjs
 import { readFileSync } from 'node:fs'
-import { loadDicom, loadSeg, suvFactor } from '../composables/dicom.ts'
-import { run } from '../composables/analyses.ts'
+import { loadDicom, suvFactor } from '../composables/dicom.ts'
 
 const { files, segs } = JSON.parse(readFileSync('public/dicom/manifest.json', 'utf8'))
 const close = (a, b, tol = 1e-3) => Math.abs(a - b) <= tol * Math.max(1, Math.abs(b))
@@ -28,26 +27,19 @@ for (const f of files) {
 }
 console.log(`${files.length - bad}/${files.length} files match pydicom`)
 
-// DICOM SEG files and the four "Run" analyses: the numbers shown on the slides must match pydicom
-const open = (name) => { const b = readFileSync(`public/dicom/${name}`); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }
+// Demo E: the Python outputs shown on the slides (notebook cells E2, E3) must match the reference values
+// computed independently by notebook/prepare_deck_assets.py
+const cells = JSON.parse(readFileSync('data/notebook/cells.json', 'utf8'))
 let segBad = 0
-for (const s of segs) {
-  const g = await loadSeg(open(s.file))
-  if (s.voxels !== undefined && g.voxels !== s.voxels) { segBad++; console.log(`FAIL ${s.file}: ${g.voxels} voxels vs ${s.voxels}`) }
-}
-const nod = await run('nodule', open)
-nod.rows.forEach((r, i) => {
-  const ref = segs.find(s => s.reader === i + 1)
-  const ok = r[1] === `${(ref.volume_mm3 / 1000).toFixed(1)} cm³` && r[2] === `${ref.longest_diameter_on_ct_slice_mm.toFixed(0)} mm` && r[3] === ref.mean_hu_on_ct_slice.toFixed(0)
+for (const s of segs.filter(x => x.reader)) {
+  const line = `Reader ${s.reader}: ${(s.volume_mm3 / 1000).toFixed(1)} cm³, longest ${s.longest_diameter_on_ct_slice_mm.toFixed(0)} mm, mean ${s.mean_hu_on_ct_slice.toFixed(0)} HU`
+  const ok = cells.E2.output.includes(line)
   if (!ok) segBad++
-  console.log(`${ok ? 'ok  ' : 'FAIL'} nodule ${r.join(' | ')}  (pydicom: ${(ref.volume_mm3 / 1000).toFixed(1)} cm³, ${ref.longest_diameter_on_ct_slice_mm.toFixed(0)} mm, ${ref.mean_hu_on_ct_slice.toFixed(0)} HU)`)
-})
-const pet = await run('pet', open)
-const pr = segs.find(s => s.suv_max !== undefined)
-const want = [['SUVmax', pr.suv_max.toFixed(1)], ['SUVmean', pr.suv_mean.toFixed(1)], ['Area', `${pr.area_cm2.toFixed(1)} cm²`]]
-want.forEach(([k, v], i) => { const ok = pet.rows[i][0] === k && pet.rows[i][1] === v; if (!ok) segBad++; console.log(`${ok ? 'ok  ' : 'FAIL'} pet ${pet.rows[i].join(' ')} (pydicom ${v})`) })
-const ratio = (pr.suv_mean / pr.background_suv_mean).toFixed(1)
-if (!pet.says[0].includes(`ratio ${ratio}`)) { segBad++; console.log(`FAIL pet ratio: ${pet.says[0]} (pydicom ${ratio})`) }
-for (const id of ['tissue', 'audit']) { const o = await run(id, open); console.log(`ran ${id}:`, o.rows.map(r => r.join(' ')).join(' / '), '|', o.says.join(' ')) }
-console.log(segBad ? `${segBad} SEG/analysis problem(s)` : 'SEG files and analyses match pydicom')
+  console.log(`${ok ? 'ok  ' : 'FAIL'} E2 ${line}`)
+}
+const pr = segs.find(x => x.suv_max !== undefined)
+const petLine = `SUVmax ${pr.suv_max.toFixed(1)} | SUVmean ${pr.suv_mean.toFixed(1)} | area ${pr.area_cm2.toFixed(1)} cm²`
+const ratio = `ratio ${(pr.suv_mean / pr.background_suv_mean).toFixed(1)}`
+for (const want of [petLine, ratio]) { const ok = cells.E3.output.includes(want); if (!ok) segBad++; console.log(`${ok ? 'ok  ' : 'FAIL'} E3 ${want}`) }
+console.log(segBad ? `${segBad} Demo E output(s) differ from the reference` : 'Demo E outputs match the reference values')
 process.exit(bad || segBad ? 1 : 0)

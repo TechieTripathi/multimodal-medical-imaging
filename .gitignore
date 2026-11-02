@@ -13,3 +13,6 @@ exports/
 # Downloaded datasets (see notebook/download_data.py)
 notebook/data/raw/
 notebook/data/work/
+
+# Figures written by notebook/dicom_insights.py
+notebook/figures/

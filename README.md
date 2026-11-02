@@ -47,7 +47,7 @@ npm run export:notes     # speaker notes
 | Model results shown on slides | `data/runs/*.json` (built by `notebook/run_*.py` and the notebook) |
 | Notebook cells shown on demo slides | `data/notebook/` (built by `notebook/build_notebook.py --extract`) |
 | Real DICOM sample pack (viewer, demos, downloads) | `public/dicom/` (built by `prepare_deck_assets.py dicom_examples`); in-browser reader `composables/dicom.ts` (images and DICOM SEG) |
-| Code that runs on the demo slides (Demo E) | `composables/analyses.ts`: the shown source is exactly what the Run button executes |
+| Python analyses on DICOM (Demo E) | Notebook Workflow E (cells E0–E4) and `notebook/dicom_insights.py`, generated from the same cells by `build_notebook.py` |
 | Sources | `data/refs/*.ts`; list keys in a slide's `sources:` frontmatter |
 | Colours, type sizes | `styles/tokens.css` (series theme, larger type scale) |
 | Honesty label | `tag:` and `tagText:` in a slide's frontmatter; `actual` also needs `run:` |
@@ -60,7 +60,7 @@ Speaker notes are the HTML comment at the end of each slide (Time, Objective, Sa
 npm run check                                       # 66 slides, sections, notes, citation keys, honesty labels, run files, word limits, timing = 120 min
 npm run check:urls                                  # every source URL resolves
 node --experimental-strip-types scripts/test-wordpiece.mjs   # in-page tokenizer matches BiomedCLIP's
-node --experimental-strip-types scripts/test-dicom.mjs       # in-browser DICOM reader, SEG reader and Demo E analyses match pydicom
+node --experimental-strip-types scripts/test-dicom.mjs       # in-browser DICOM reader matches pydicom; Demo E outputs match the reference values
 node scripts/shot.mjs <port> <outDir> 12:0 12:3     # screenshot slides at click states (page numbers include cover and openers)
 node scripts/contact-sheet.mjs <port> <outDir> 1 71 # first and last state of every page
 ```

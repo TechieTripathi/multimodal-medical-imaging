@@ -1,8 +1,8 @@
 {
  "device": "NVIDIA RTX PRO 4000 Blackwell",
  "biomedclip_seconds_per_image": {
-  "cpu_s": 0.037,
-  "gpu_s": 0.0052
+  "cpu_s": 1.07,
+  "gpu_s": 0.01
  },
  "patient_xray_ranking": {
   "a chest X-ray showing a mass in the lung": 0.405,
