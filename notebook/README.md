@@ -7,6 +7,7 @@
 | A | Load a DICOM CT, sort slices, convert to Hounsfield units, window, view in three planes | none | seconds | seconds |
 | B | Prepare the patient's X-ray from DICOM and match it with descriptions | BiomedCLIP | 0.025 s per image | about 1.2 s per image |
 | C | Outline anatomy (TotalSegmentator) and the nodule (MedSAM); compare with four radiologists | TotalSegmentator, MedSAM | about 1–2.5 min | several minutes (fast mode) |
+| D | Open real DICOM from six kinds of scanner; ultrasound frames; PET SUV from tags; PET/CT fusion | none | seconds | seconds |
 
 Times were measured on an NVIDIA RTX PRO 4000 Blackwell (24 GB) on 30 October 2026; your CPU times will vary.
 
@@ -22,6 +23,8 @@ jupyter lab multimodal-medical-imaging.ipynb
 
 The first run of each model downloads its weights from Hugging Face or GitHub (BiomedCLIP about 800 MB, MedSAM about 360 MB, TotalSegmentator about 1 GB). On a machine without internet during the session, run the notebook once beforehand.
 
+Workflow D needs no download: it reads the sample pack in `../public/dicom/`. `python download_data.py --dicom` fetches the originals behind it (about 480 MB).
+
 Optional: `python download_data.py --all` also fetches the Indiana University X-rays (1.4 GB), pathology tiles (800 MB), ultrasound (130 MB) and retina photographs (1.8 GB) used on other slides. Cell B4 needs the IU X-rays.
 
 ## Data and licences
@@ -34,6 +37,9 @@ Optional: `python download_data.py --all` also fetches the Indiana University X-
 | CRC-VAL-HE-7K (Zenodo) | Colorectal tissue tiles | CC BY 4.0 |
 | HC18 (Zenodo) | Fetal head ultrasound with outlines | CC BY 4.0 |
 | FIVES (figshare) | Fundus photographs with vessel outlines | CC BY 4.0 |
+| CMMD (TCIA), patient D2-0333 | Mammograms (DICOM) and clinical table | CC BY 4.0 |
+| B-mode-and-CEUS-Liver (TCIA), LiverUS-01 | Multi-frame liver ultrasound (DICOM) | CC BY 4.0 |
+| FDG-PET-CT-Lesions (TCIA, defaced release), PETCT_b899150306 | PET, CT and lesion SEG (DICOM) | CC BY 4.0 |
 
 ## Privacy
 
@@ -73,6 +79,7 @@ To rebuild everything the slides show:
 python prepare_deck_assets.py ct dx sr mri gallery dicom pipeline
 python run_segmentation.py
 python prepare_deck_assets.py attn apps
+python download_data.py --dicom && python prepare_deck_assets.py dicom_examples   # the DICOM sample pack and PET/CT arrays
 python run_cnn_features.py
 python run_biomedclip.py            # all parts; needs the --all datasets
 python build_notebook.py && jupyter nbconvert --to notebook --execute --inplace multimodal-medical-imaging.ipynb && python build_notebook.py --extract

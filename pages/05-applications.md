@@ -83,8 +83,35 @@ sources: [wasserthal2023totalseg, lidc2015data]
 **Try / Notice:** Blue = lungs, red = heart, orange = aorta, yellow = spine.
 **Ask:** Where would you use automatic organ volumes?
 **Caveat:** Volumes come from this research run; the liver is only partly inside the chest CT's field of view.
-**Transition:** Brain MRI adds several sequences per patient.
+**Transition:** PET/CT adds a second kind of image to the CT.
 **Sources:** wasserthal2023totalseg; lidc2015data. Run: data/runs/segmentation.json.
+-->
+
+---
+section: 5
+layout: artifact
+clicks: 3
+tag: real-data
+tagText: 'FDG-PET-CT-Lesions: real PET, CT and expert outline (DICOM)'
+sources: [gatidis2022fdgpetct, boellaard2015petguideline]
+---
+
+::title::
+# PET/CT: two kinds of image, one picture
+
+::default::
+<PetCtFusion />
+
+<!--
+**Time:** ~2 min
+**Objective:** Show PET/CT as multimodal imaging: anatomy and function combined.
+**Say:** A PET/CT scanner takes two images in one session. CT shows anatomy, in Hounsfield units. [click] PET shows where sugar is being used, in SUV: tumours are greedy. On its own, PET shows a hot spot but not exactly where it is. [click] Fused, the hot spot gets an address: next to the airways in the chest. Because both files share a frame of reference, they line up without any registration. [click] The cyan line is an expert's outline of the tumour, stored as a DICOM SEG: SUVmax 18, about 134 millilitres. On the right, the whole-body view: darker means more uptake; the brain, heart and bladder are normal, the chest is not.
+**Example:** The PET says "something is burning", the CT says "on the third floor, room 12".
+**Try / Notice:** Move the PET opacity slider; point at the image to read HU and SUV together.
+**Ask:** Which multimodal model from Part 3 could use both images at once?
+**Caveat:** Lung cancer patient from a public German collection (defaced release). The CT was taken for attenuation correction and anatomy; diagnostic decisions use the full clinical work-up.
+**Transition:** Brain MRI adds several sequences per patient.
+**Sources:** gatidis2022fdgpetct — PET, CT and lesion masks; boellaard2015petguideline — SUV.
 -->
 
 ---
@@ -237,7 +264,7 @@ sources: [vandenheuvel2018hc18]
 </AppCase>
 
 <!--
-**Time:** ~1.5 min
+**Time:** ~1 min
 **Objective:** Apply measurement AI to ultrasound.
 **Say:** Ultrasound is live, cheap and everywhere, but it depends on the person holding the probe. [click] In this public challenge dataset, the task is to outline the baby's head and fit an ellipse. [click] The output is the head circumference in millimetres: 71.9 for this image, from the expert's outline. [click] Automating it makes measurements faster and more consistent. [click] But if the operator captures a poor view, no model can rescue the measurement.
 **Example:** The yellow ellipse is the expert's outline from the dataset.
@@ -265,7 +292,7 @@ sources: [demnerfushman2016iu, zhang2025biomedclip]
 <RetrievalDemo />
 
 <!--
-**Time:** ~1.5 min
+**Time:** ~1 min
 **Objective:** Show image–text retrieval: finding similar cases by description.
 **Say:** Because images and sentences share one space, we can search images with words. Here the query is "a chest X-ray showing an enlarged heart", run against the X-rays from our earlier test. [click] These are the five images whose fingerprints point most nearly the same way as the sentence. [click] And here is what their reports said: all five were reported with an enlarged heart.
 **Example:** Teaching files: "show me five examples of cardiomegaly" from your own archive.

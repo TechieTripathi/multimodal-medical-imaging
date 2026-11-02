@@ -3,7 +3,7 @@
 
 **Audience:** Interdisciplinary Faculty Development Program (FDP) participants: AI/CS, medical and radiology, biomedical engineering, and non-technical faculty, plus students
 **Duration:** 120 minutes, including Q&A *(confirm)*
-**Deck size:** 58 numbered core slides (55–60 allowed if the story needs it), plus an unnumbered institutional cover and a Sources appendix that do not count toward the total
+**Deck size:** 64 numbered core slides (raised from 58 on 2 November 2026 to add real DICOM examples), plus an unnumbered institutional cover and a Sources appendix that do not count toward the total
 **Format:** 16:9 Slidev presentation built around interactive artifacts (Vue 3 components) and purposeful animation, light theme, speaker notes, a static SPA build for offline delivery, and PDF exports (all click states, handout, speaker notes). Optional PowerPoint export (see §12).
 **Companion:** A runnable Jupyter notebook that produces every real model output shown in the deck
 **Primary goal:** Show how AI systems connect medical images with clinical text and other patient information, how real medical imaging data is stored and prepared, and how to run and interpret real models responsibly.
@@ -55,14 +55,16 @@ By the end, participants should be able to:
 
 | Section | Slides | Time |
 |---|---:|---:|
-| 1. The medical imaging problem and multimodal AI | 1–8 | 12 min |
-| 2. How multimodal AI works | 9–18 | 22 min |
-| 3. Training, evaluation and representative models | 19–28 | 20 min |
-| 4. DICOM fundamentals and imaging workflows | 29–36 | 16 min |
-| 5. Medical-domain applications | 37–44 | 14 min |
-| 6. Practical demonstrations | 45–53 | 22 min |
-| 7. Responsible AI, research and takeaways | 54–58 | 14 min |
-| **Total** | **58 slides** | **120 min** |
+| 1. The medical imaging problem and multimodal AI | 1–8 | 11 min |
+| 2. How multimodal AI works | 9–18 | 19 min |
+| 3. Training, evaluation and representative models | 19–28 | 17 min |
+| 4. DICOM fundamentals and imaging workflows | 29–40 | 22 min |
+| 5. Medical-domain applications | 41–49 | 15 min |
+| 6. Practical demonstrations | 50–59 | 23 min |
+| 7. Responsible AI, research and takeaways | 60–64 | 13 min |
+| **Total** | **64 slides** | **120 min** |
+
+Slide numbers in §7 below are the original 58-slide plan; the six DICOM slides were inserted in Parts 4–6 (see §12, decisions).
 
 Each slide's speaker notes carry a `Time:` line; the times must sum to each section's budget (enforced by `npm run check`). If the session length changes, rebalance this table first.
 
@@ -233,6 +235,8 @@ Interactivity and animation are core teaching mechanisms in this deck, not decor
 | 21 | Neural network intuition | 9 | Pixels flow through layers into features, then into a decision | Swap the input image; highlight one layer |
 | 22 | Zero-shot prompt laboratory | 20 | Class prompts appear; real scores fill in; a reworded prompt changes the winner | Pick from prompt variants (precomputed real scores) |
 | 23 | Report claim checker | 57 | Generated report sentences appear; each is linked to image evidence or flagged as unsupported | Click a sentence to see its supporting region or the gap |
+| 25 | Live DICOM viewer | new, Part 4 | Each click opens the next real file (CT, X-ray, MRI, mammogram, PET, ultrasound) | Switch files, window level and width, frame slider, download the file, open your own file locally |
+| 26 | PET/CT fusion | new, Part 5 | CT, then PET in SUV, then fused, then the expert lesion outline (DICOM SEG) | Opacity slider; hover reads HU and SUV |
 | 24 | Notebook walkthrough | 46–52 | Code morphs cell by cell (Shiki Magic Move) with the active lines highlighted; the real output appears beside each step | Jump between cells; toggle "live run" vs "precomputed run" view |
 
 Other slides use animated builds rather than full artifacts. Examples: the opening case (slide 2) assembles image, report and history; the clinician workflow (slide 4) animates as a sequence; model mechanism diagrams (slides 24–27) build up step by step; and application slides (37–44) reveal the workflow over a real image.
@@ -287,7 +291,7 @@ Each artifact answers one question (the slide title) and has a meaningful intera
 
 - Each artifact is a self-contained Vue 3 single-file component in `components/`, using inline SVG, HTML/CSS or `<canvas>`, with its data in `data/`.
 - Clicker steps use Slidev's click system (`clicks:` frontmatter with `$clicks`, `v-click`); on-slide controls are optional extras, never required to follow the story.
-- Real image data used by artifacts lives in `data/imaging/` as derived arrays or PNGs (for example, a downsampled int16 CT volume), never as original DICOM files.
+- Real image data used by artifacts lives in `data/imaging/` as derived arrays or PNGs (for example, a downsampled int16 CT volume). Real DICOM files are shipped only as **teaching copies** in `public/dicom/` (see §11).
 - Artifacts that show real model outputs read them from `data/runs/*.json` generated by the notebook; they never hard-code scores. Artifacts that need live re-ranking load the real embedding vectors from the same files.
 - Render images with `<canvas>` (or WebGL where needed). Windowing, slicing and overlay controls must respond without visible lag (under about 50 ms per update) on the lecture-room laptop; preload image data when the slide is entered.
 - Every free control works in the offline SPA build.
@@ -483,7 +487,7 @@ Prioritize original papers, peer-reviewed publications, official model repositor
 ### Data licensing and privacy
 
 - Handle all data according to its licence, access rules and privacy requirements. Do not assume de-identification just because a dataset is public.
-- The deck may be published publicly (as `llm-to-agents` is on GitHub Pages). Only include images whose licence permits public redistribution of derived images, with attribution. Never ship original DICOM files in the deck build.
+- The deck may be published publicly (as `llm-to-agents` is on GitHub Pages). Only include images whose licence permits public redistribution of derived images, with attribution. Ship DICOM only as teaching copies: every public tag kept, private tags removed, pixels downsampled where needed, a new SOP Instance UID, and the change recorded in the file's DerivationDescription, each from a CC BY collection and checked for identifiers.
 - Strip or mask any residual identifiers and burned-in text.
 
 ---
@@ -506,6 +510,7 @@ Prioritize original papers, peer-reviewed publications, official model repositor
 - **Image–text data:** the Indiana University X-rays are used as PNG (the DICOM release is 80 GB). Their Open-i licence could not be confirmed from NLM's site, so they are treated as CC BY-NC-ND 4.0 and shown unmodified. **Confirm before public hosting.**
 - **Report generation was not run.** MedGemma's download is gated by terms that only the account holder can accept; Artifact 23 and slide 27 use clearly labelled simulated text, checked against the patient's real evidence.
 - **Brain MRI:** UPENN-GBM-00001 (CC BY 4.0), four sequences rigidly registered in the notebook; slice chosen by eye through the lesion.
+- **Real DICOM examples (2 November 2026).** Six slides added (deck now 64, still 120 minutes): a live DICOM viewer (Artifact 25), ultrasound cine, mammogram tags with the clinical table, PET SUV from tags (Part 4); PET/CT fusion (Artifact 26, Part 5); Demo D (Part 6). New data, all CC BY 4.0 from TCIA: CMMD (mammography, patient D2-0333), B-mode-and-CEUS-Liver (ultrasound cine, LiverUS-01), FDG-PET-CT-Lesions defaced release (lung cancer patient PETCT_b899150306). Seven teaching copies in `public/dicom/` form the downloadable sample pack; `scripts/test-dicom.mjs` checks the in-browser reader against pydicom.
 
 ### Project organization
 

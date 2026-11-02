@@ -1,0 +1,33 @@
+{
+ "source": "FDG-PET-CT-Lesions, patient PETCT_b899150306 (lung cancer), TCIA, CC BY 4.0 (defaced release)",
+ "grid": [
+  512,
+  512
+ ],
+ "ct_slice": 207,
+ "pet_slice": 171,
+ "ct_spacing_mm": [
+  0.8027,
+  0.8027,
+  2.5
+ ],
+ "suv_factor": 0.00029712119100714084,
+ "suv_scale": 100,
+ "mip_suv_max_display": 8,
+ "lesion": {
+  "suv_max": 18.12,
+  "suv_mean": 3.63,
+  "volume_ml": 133.9,
+  "slice_area_px": 2914
+ },
+ "tags": {
+  "weight_kg": 61.0,
+  "dose_mbq": 300.0,
+  "half_life_s": 6586.2,
+  "injection_time": "091000.000000",
+  "series_time": "101004.000000",
+  "units": "BQML",
+  "decay_correction": "START",
+  "radiopharmaceutical": "Fluorodeoxyglucose"
+ }
+}

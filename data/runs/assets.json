@@ -34,5 +34,9 @@
  "apps": {
   "built": "2026-10-30",
   "script": "notebook/prepare_deck_assets.py"
+ },
+ "dicom_examples": {
+  "built": "2026-11-02",
+  "script": "notebook/prepare_deck_assets.py"
  }
 }

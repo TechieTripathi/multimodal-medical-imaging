@@ -128,7 +128,7 @@ clicks: 1
 <Takeaways />
 
 <!--
-**Time:** ~3.5 min
+**Time:** ~2.5 min
 **Objective:** Consolidate the session and open questions; take questions.
 **Say:** Four things to remember. Multimodal AI works by turning images and words into numbers that can be compared. The details of how medical images are stored, such as units, slice order and windows, change the results. Wording, preparation and changes in the data all move the scores. And a score is not a diagnosis: validate locally and keep a clinician in charge. [click] And for researchers in the room, four open problems worth working on, starting with models trained and tested on our own patients and scanners. The notebook and all the data sources are yours to take away. Questions?
 **Example:** The companion notebook reproduces every real number in this deck.

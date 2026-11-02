@@ -50,7 +50,7 @@
  },
  "B5": {
   "code": "# B5. How long does one image take?\ndef time_one(device, n=20):\n    m = model.to(device)\n    x = image.to(device)\n    with torch.no_grad():\n        m.encode_image(x)                                   # warm-up\n        t = time.perf_counter()\n        for _ in range(n):\n            m.encode_image(x)\n        if device == 'cuda': torch.cuda.synchronize()\n    return (time.perf_counter() - t) / n\n\ntimings = {'cpu_s': round(time_one('cpu', 5), 3)}\nif DEVICE == 'cuda':\n    timings['gpu_s'] = round(time_one('cuda'), 4)\nmodel = model.to(DEVICE)\nprint('Seconds per image:', timings)",
-  "output": "Seconds per image: {'cpu_s': 1.176, 'gpu_s': 0.0244}",
+  "output": "Seconds per image: {'cpu_s': 0.037, 'gpu_s': 0.0052}",
   "figures": []
  },
  "C1": {
@@ -70,8 +70,32 @@
   "output": "MedSAM vs each radiologist (Dice on this slice): [0.75, 0.76, 0.76, 0.77]",
   "figures": []
  },
+ "D1": {
+  "code": "# D1. Open every file and print the tags that matter for each kind of scan\npack = sorted(glob.glob('../public/dicom/*.dcm'))\nfor f in pack:\n    d = pydicom.dcmread(f)\n    frames = int(d.get('NumberOfFrames', 1))\n    print(f\"{os.path.basename(f):28s} {d.Modality:3s} {d.Rows}x{d.Columns}\"\n          f\"{f' x{frames} frames' if frames > 1 else ''}  {d.PhotometricInterpretation:11s} {d.BitsStored}-bit\"\n          f\"  units: {'HU' if d.Modality == 'CT' else d.get('Units', '-')}\")\nprint()\nprint('Change recorded in one file:', pydicom.dcmread(pack[0]).DerivationDescription)",
+  "output": "ct-fdg-lung.dcm              CT  512x512  MONOCHROME2 12-bit  units: HU\nct-lidc-0001.dcm             CT  512x512  MONOCHROME2 16-bit  units: HU\nmammo-cmmd-d2-0333.dcm       MG  573x478  MONOCHROME2 8-bit  units: -\nmri-flair-upenn-00001.dcm    MR  256x192  MONOCHROME2 16-bit  units: -\npet-fdg-lung.dcm             PT  400x400  MONOCHROME2 16-bit  units: BQML\nus-liver-ceus.dcm            US  162x292 x21 frames  RGB         8-bit  units: -\nxray-lidc-0001.dcm           DX  505x505  MONOCHROME2 14-bit  units: -\n\nChange recorded in one file: Teaching copy for an FDP slide deck: private tags removed; pixels unchanged. Source https://doi.org/10.7937/gkr0-xv29 (CC BY).",
+  "figures": []
+ },
+ "D2": {
+  "code": "# D2. Modality-specific details: which breast (mammogram), and an ultrasound file is a video\nmg = pydicom.dcmread('../public/dicom/mammo-cmmd-d2-0333.dcm')\nprint('Mammogram: ImageLaterality =', mg.ImageLaterality, '| ViewPosition =', mg.get('ViewPosition', 'not recorded'))\nus = pydicom.dcmread('../public/dicom/us-liver-ceus.dcm')\ncine = us.pixel_array                                   # (frames, rows, columns, 3): colour video\nprint('Ultrasound:', cine.shape, '| FrameTime', float(us.FrameTime), 'ms | duration', round(cine.shape[0] * float(us.FrameTime) / 1000, 1), 's')\nfig, axes = plt.subplots(1, 3, figsize=(12, 3))\nfor ax, k in zip(axes, [0, cine.shape[0] // 2, cine.shape[0] - 1]):\n    ax.imshow(cine[k]); ax.set_title(f'frame {k + 1}'); ax.axis('off')\nplt.show()",
+  "output": "Mammogram: ImageLaterality = R | ViewPosition = not recorded\nUltrasound: (21, 162, 292, 3) | FrameTime 537.3984 ms | duration 11.3 s",
+  "figures": [
+   "D2_0.png"
+  ]
+ },
+ "D3": {
+  "code": "# D3. PET pixels are Bq/ml; the file's own tags turn them into SUV (body weight, decay-corrected)\npet = pydicom.dcmread('../public/dicom/pet-fdg-lung.dcm')\nr = pet.RadiopharmaceuticalInformationSequence[0]\ntm = lambda t: int(t[:2]) * 3600 + int(t[2:4]) * 60 + float(t[4:])\nminutes = (tm(pet.SeriesTime) - tm(r.RadiopharmaceuticalStartTime)) / 60\ndose_now = float(r.RadionuclideTotalDose) * 2 ** (-minutes * 60 / float(r.RadionuclideHalfLife))\nsuv = pet.pixel_array * float(pet.RescaleSlope) * float(pet.PatientWeight) * 1000 / dose_now\nprint(f'{r.Radiopharmaceutical}: {float(r.RadionuclideTotalDose) / 1e6:.0f} MBq, scan {minutes:.1f} min later'\n      f' -> {dose_now / 1e6:.1f} MBq left; weight {pet.PatientWeight} kg; max SUV on this slice {suv.max():.1f}')",
+  "output": "Fluorodeoxyglucose: 300 MBq, scan 60.1 min later -> 205.3 MBq left; weight 61 kg; max SUV on this slice 14.2",
+  "figures": []
+ },
+ "D4": {
+  "code": "# D4. PET/CT fusion: the PET and CT files share a frame of reference, so their positions line up\nct2 = pydicom.dcmread('../public/dicom/ct-fdg-lung.dcm')\nhu2 = ct2.pixel_array * float(ct2.RescaleSlope) + float(ct2.RescaleIntercept)\nprint('Same frame of reference:', pet.FrameOfReferenceUID == ct2.FrameOfReferenceUID,\n      '| CT', ct2.Rows, 'px at', float(ct2.PixelSpacing[0]), 'mm; PET', pet.Rows, 'px at', float(pet.PixelSpacing[0]), 'mm')\n# Place both in millimetres and draw PET on top of CT\next = lambda d: [float(d.ImagePositionPatient[0]), float(d.ImagePositionPatient[0]) + d.Columns * float(d.PixelSpacing[1]),\n                 float(d.ImagePositionPatient[1]) + d.Rows * float(d.PixelSpacing[0]), float(d.ImagePositionPatient[1])]\nplt.figure(figsize=(5, 5))\nplt.imshow(window(hu2, 40, 400), cmap='gray', extent=ext(ct2))\nplt.imshow(np.ma.masked_less(suv, 1.5), cmap='hot', vmin=0, vmax=8, alpha=0.6, extent=ext(pet))\nplt.xlim(ext(ct2)[:2]); plt.ylim(ext(ct2)[2:]); plt.axis('off'); plt.title('PET (SUV) on CT'); plt.show()",
+  "output": "Same frame of reference: True | CT 512 px at 0.802734375 mm; PET 400 px at 2.03642 mm",
+  "figures": [
+   "D4_0.png"
+  ]
+ },
  "SAVE": {
-  "code": "# Record what this run produced, so the slides can show where their numbers came from\nos.makedirs('../data/runs', exist_ok=True)\njson.dump({'device': torch.cuda.get_device_name(0) if DEVICE == 'cuda' else 'CPU',\n           'biomedclip_seconds_per_image': timings,\n           'patient_xray_ranking': {candidates[i]: round(float(cosine[i]), 4) for i in np.argsort(-cosine)},\n           'softmax_top2': [round(float(p[top2[0]]), 3), round(float(p[top2[1]]), 3)],\n           'medsam_dice_vs_readers': [round(float(dice(mask, r[z])), 3) for r in readers],\n           'run_date': time.strftime('%Y-%m-%d')},\n          open('../data/runs/notebook.json', 'w'), indent=1)\nprint('saved ../data/runs/notebook.json')",
+  "code": "# Record what this run produced, so the slides can show where their numbers came from\nos.makedirs('../data/runs', exist_ok=True)\njson.dump({'device': torch.cuda.get_device_name(0) if DEVICE == 'cuda' else 'CPU',\n           'biomedclip_seconds_per_image': timings,\n           'patient_xray_ranking': {candidates[i]: round(float(cosine[i]), 4) for i in np.argsort(-cosine)},\n           'softmax_top2': [round(float(p[top2[0]]), 3), round(float(p[top2[1]]), 3)],\n           'medsam_dice_vs_readers': [round(float(dice(mask, rd[z])), 3) for rd in readers],\n           'run_date': time.strftime('%Y-%m-%d')},\n          open('../data/runs/notebook.json', 'w'), indent=1)\nprint('saved ../data/runs/notebook.json')",
   "output": "saved ../data/runs/notebook.json",
   "figures": []
  }

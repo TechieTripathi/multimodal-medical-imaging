@@ -58,7 +58,7 @@ sources: [radford2021clip, zhang2025biomedclip, kather2018crcdata]
 <ZeroShotLab />
 
 <!--
-**Time:** ~2.5 min
+**Time:** ~2 min
 **Objective:** Explain zero-shot classification and its fragility, with a real experiment.
 **Say:** Zero-shot means the model was never trained on these categories. We simply write a description for each class, and the model picks the description whose fingerprint is closest to the image. We tested BiomedCLIP on 900 real tissue tiles in nine classes. Guessing would get 11%. [click] With abbreviations as the descriptions, like "ADI" and "TUM": 8%, worse than guessing. [click] With plain names: 36%. [click] With "this is a photo of …": 38%. [click] And with "an H&E stained histopathology image of …": 52%. Same model, same images. Only the wording changed.
 **Example:** Like asking a colleague a question in jargon they do not share.
@@ -86,7 +86,7 @@ sources: [zhang2025biomedclip, kather2018crcdata]
 <FewShotCurve />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show transfer learning: reusing a trained model and adapting it with few labels.
 **Say:** Here is the same test, but now we give the system a few labelled examples. We keep BiomedCLIP frozen and train only a tiny layer on top of its fingerprints. The red line is guessing. [click] The orange line is the best zero-shot wording, 52%. [click] With just one labelled tile per class, nine images in total, accuracy jumps to 75%. With ten per class, 91%. This is transfer learning: the big model has already learned what tissue looks like; a little local data teaches it your categories.
 **Example:** An experienced pathologist from another country needs only a few examples to learn your lab's labels.
@@ -114,7 +114,7 @@ sources: [demnerfushman2016iu, zhang2025biomedclip]
 <ThresholdExplorer />
 
 <!--
-**Time:** ~3 min
+**Time:** ~2.5 min
 **Objective:** Explain sensitivity, specificity, precision and AUROC on real scores.
 **Say:** Each dot is a real chest X-ray. Orange ones were reported as showing an enlarged heart; grey ones as normal. Their position is BiomedCLIP's zero-shot score: further right means "more like an enlarged heart". [click] To make a decision we need a threshold: everything to the right is called enlarged. The table counts what happens: correct calls in green, missed cases and false alarms in red. [click] Sensitivity: of the enlarged hearts, how many we found. Specificity: of the normal ones, how many we cleared. Precision: of our alarms, how many were right. Move the threshold and they trade off. [click] The ROC curve shows every possible threshold at once; the area under it, AUROC, is 0.90 here. 1 would be perfect, 0.5 is guessing.
 **Example:** Screening wants high sensitivity, because missing a case is costly; confirmation wants high specificity.
@@ -142,7 +142,7 @@ sources: [fedorov2018lidcdicom, ma2024medsam, maierhein2024metrics]
 <OverlapExplorer />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Explain Dice and IoU on real outlines, and Recall@K for retrieval.
 **Say:** For outlines, we compare areas. The blue line is the first radiologist's outline of our patient's nodule. [click] Orange is the second radiologist's. Dice is twice the overlap divided by both areas added: here about 0.91. Two experts, same image, not identical. [click] Green is MedSAM's outline, which we ran on this slice. Against the first radiologist, Dice falls to about 0.75: MedSAM drew a smaller nodule. [click] For search tasks we use a different measure: Recall at 1, how often the right answer is ranked first. In our six-pair batch earlier, two of six.
 **Example:** Two people colouring in the same shape: Dice is how much their colouring agrees.
@@ -170,7 +170,7 @@ sources: [radford2021clip, zhang2025biomedclip]
 <ClipVsBiomed />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Introduce CLIP and BiomedCLIP, and test the claim that domain data helps.
 **Say:** CLIP, from 2021, learned from 400 million image–caption pairs from the internet: photos of dogs, cars, food. [click] BiomedCLIP used the same recipe but with 15 million figures and captions from biomedical papers. [click] Does that matter? We ran both on the same 900 pathology tiles. BiomedCLIP wins with the best wording, 52% against 48%, but general CLIP is closer than you might expect, and wins on one wording. Domain data helps, but it is not magic.
 **Example:** A brilliant generalist versus a specialist with a narrower education.
@@ -225,7 +225,7 @@ sources: [ma2024medsam]
 <MedSAMPrompt />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Explain promptable segmentation with a real run.
 **Say:** MedSAM is a segmentation model: it draws outlines. Its trick is that you tell it where to look. [click] A person draws a rough box around the target. [click] MedSAM outlines what is inside. This is a real run on our patient, which took about two seconds on our GPU. It was trained on 1.57 million images with outlines from ten kinds of scan, which is why one model can work on CT, MRI, ultrasound and more.
 **Example:** Like asking a colleague "can you trace that lump for me?" while pointing at it.

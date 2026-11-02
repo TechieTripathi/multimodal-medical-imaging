@@ -1,0 +1,234 @@
+{
+ "note": "Teaching copies of real DICOM files from public TCIA collections. Each file records its changes in DerivationDescription.",
+ "files": [
+  {
+   "file": "ct-lidc-0001.dcm",
+   "bytes": 526558,
+   "tags": {
+    "Modality": "CT",
+    "Rows": 512,
+    "Columns": 512,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "PixelSpacing": [
+     0.703125,
+     0.703125
+    ],
+    "RescaleSlope": 1.0,
+    "RescaleIntercept": -1024.0,
+    "WindowCenter": -600.0,
+    "WindowWidth": 1600.0,
+    "Manufacturer": "GE MEDICAL SYSTEMS",
+    "PatientID": "LIDC-IDRI-0001",
+    "BodyPartExamined": "CHEST"
+   },
+   "pixels": {
+    "min": -2048.0,
+    "max": 3071.0,
+    "mean": -857.118
+   },
+   "title": "Chest CT slice",
+   "credit": "LIDC-IDRI (TCIA) \u00b7 CC BY 3.0"
+  },
+  {
+   "file": "xray-lidc-0001.dcm",
+   "bytes": 511992,
+   "tags": {
+    "Modality": "DX",
+    "Rows": 505,
+    "Columns": 505,
+    "BitsStored": 14,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "RescaleSlope": 1.0,
+    "RescaleIntercept": 0.0,
+    "WindowCenter": -600.0,
+    "WindowWidth": 1600.0,
+    "Manufacturer": "GE MEDICAL SYSTEMS",
+    "PatientID": "LIDC-IDRI-0001",
+    "BodyPartExamined": "CHEST"
+   },
+   "pixels": {
+    "min": 197.0,
+    "max": 14467.0,
+    "mean": 7210.48
+   },
+   "title": "Chest X-ray",
+   "credit": "LIDC-IDRI (TCIA) \u00b7 CC BY 3.0"
+  },
+  {
+   "file": "mri-flair-upenn-00001.dcm",
+   "bytes": 101402,
+   "tags": {
+    "Modality": "MR",
+    "Rows": 256,
+    "Columns": 192,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "PixelSpacing": [
+     0.9375,
+     0.9375
+    ],
+    "RescaleSlope": 1.0,
+    "RescaleIntercept": 0.0,
+    "WindowCenter": 390.0,
+    "WindowWidth": 901.0,
+    "Manufacturer": "SIEMENS",
+    "SeriesDescription": "t2_Flair_axial: Processed_CaPTk",
+    "PatientID": "UPENN-GBM-00001",
+    "BodyPartExamined": "BRAIN"
+   },
+   "pixels": {
+    "min": 0.0,
+    "max": 1494.0,
+    "mean": 153.616
+   },
+   "title": "Brain MRI, FLAIR",
+   "credit": "UPENN-GBM (TCIA) \u00b7 CC BY 4.0"
+  },
+  {
+   "file": "us-liver-ceus.dcm",
+   "bytes": 2982850,
+   "tags": {
+    "Modality": "US",
+    "Rows": 162,
+    "Columns": 292,
+    "BitsStored": 8,
+    "PhotometricInterpretation": "RGB",
+    "SamplesPerPixel": 3,
+    "NumberOfFrames": 21,
+    "FrameTime": 537.3984,
+    "Manufacturer": "GE Healthcare",
+    "PatientID": "LiverUS-01",
+    "BodyPartExamined": "LIVER"
+   },
+   "pixels": {
+    "min": 0.0,
+    "max": 255.0,
+    "mean": 30.73
+   },
+   "title": "Liver ultrasound cine (B-mode + contrast)",
+   "credit": "B-mode-and-CEUS-Liver (TCIA) \u00b7 CC BY 4.0",
+   "original": {
+    "frames": 105,
+    "frame_time_ms": 107.47968,
+    "rows": 649,
+    "cols": 1170
+   }
+  },
+  {
+   "file": "mammo-cmmd-d2-0333.dcm",
+   "bytes": 276398,
+   "tags": {
+    "Modality": "MG",
+    "Rows": 573,
+    "Columns": 478,
+    "BitsStored": 8,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "ImagerPixelSpacing": [
+     0.376364,
+     0.376364
+    ],
+    "RescaleSlope": 1.0,
+    "RescaleIntercept": 0.0,
+    "ImageLaterality": "R",
+    "WindowCenter": 128.0,
+    "WindowWidth": 256.0,
+    "Manufacturer": "",
+    "PatientID": "D2-0333",
+    "BodyPartExamined": "BREAST"
+   },
+   "pixels": {
+    "min": 0.0,
+    "max": 239.0,
+    "mean": 30.575
+   },
+   "title": "Mammogram",
+   "credit": "CMMD (TCIA) \u00b7 CC BY 4.0",
+   "clinical": {
+    "age": 85,
+    "side": "R",
+    "abnormality": "mass",
+    "classification": "Malignant",
+    "subtype": "Luminal B"
+   }
+  },
+  {
+   "file": "pet-fdg-lung.dcm",
+   "bytes": 324658,
+   "tags": {
+    "Modality": "PT",
+    "Rows": 400,
+    "Columns": 400,
+    "BitsStored": 16,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "PixelSpacing": [
+     2.03642,
+     2.03642
+    ],
+    "RescaleSlope": 0.729036,
+    "RescaleIntercept": 0.0,
+    "Units": "BQML",
+    "WindowCenter": 23888.0,
+    "WindowWidth": 47776.0,
+    "Manufacturer": "SIEMENS",
+    "SeriesDescription": "PET corr.",
+    "PatientID": "PETCT_b899150306",
+    "BodyPartExamined": "WHOLEBODY"
+   },
+   "pixels": {
+    "min": 0.0,
+    "max": 47776.645,
+    "mean": 235.46
+   },
+   "title": "FDG PET slice",
+   "credit": "FDG-PET-CT-Lesions (TCIA) \u00b7 CC BY 4.0",
+   "suv": {
+    "factor": 0.00029712119100714084,
+    "minutes_after_injection": 60.07,
+    "dose_at_scan_mbq": 205.3
+   }
+  },
+  {
+   "file": "ct-fdg-lung.dcm",
+   "bytes": 528022,
+   "tags": {
+    "Modality": "CT",
+    "Rows": 512,
+    "Columns": 512,
+    "BitsStored": 12,
+    "PhotometricInterpretation": "MONOCHROME2",
+    "SamplesPerPixel": 1,
+    "PixelSpacing": [
+     0.802734375,
+     0.802734375
+    ],
+    "RescaleSlope": 1.0,
+    "RescaleIntercept": -1024.0,
+    "WindowCenter": [
+     40.0,
+     300.0
+    ],
+    "WindowWidth": [
+     300.0,
+     1500.0
+    ],
+    "Manufacturer": "SIEMENS",
+    "SeriesDescription": "GK p.v.3",
+    "PatientID": "PETCT_b899150306",
+    "BodyPartExamined": "ABDOMEN"
+   },
+   "pixels": {
+    "min": -1024.0,
+    "max": 1250.0,
+    "mean": -667.966
+   },
+   "title": "CT slice from the same PET/CT",
+   "credit": "FDG-PET-CT-Lesions (TCIA) \u00b7 CC BY 4.0"
+  }
+ ]
+}

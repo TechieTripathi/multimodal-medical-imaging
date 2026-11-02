@@ -6,23 +6,24 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 
 | Check | Result |
 |---|---|
-| Core slides | 58, in 7 sections (8 / 10 / 10 / 8 / 8 / 9 / 5), plus an unnumbered cover, 7 unnumbered section openers and a 5-page Sources appendix |
+| Core slides | 64, in 7 sections (8 / 10 / 10 / 12 / 9 / 10 / 5), plus an unnumbered cover, 7 unnumbered section openers and a 5-page Sources appendix |
 | Timing | Speaker-note times sum to exactly 120 min; every section matches its budget |
 | Speaker notes | On every slide; demo slides add Steps, Expected observations, Likely failure modes, Fallback |
 | Honesty labels | One per slide where a visual needs it; every "Real model output" label points to a run file that exists (checked by script) |
-| Artifacts | All 24 artifacts in IDEA.md §6.3 built; artifacts 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19, 20, 22 compute from real data in the page |
+| Artifacts | All 26 artifacts in IDEA.md §6.3 built (25: live DICOM viewer, 26: PET/CT fusion, added 2 November 2026); artifacts 3, 4, 5, 6, 7, 10, 11, 14, 15, 18, 19, 20, 22 compute from real data in the page |
 | Sources | 34, all used on slides. DOIs checked against Crossref or DataCite; arXiv abstracts read; legal sources opened on official sites |
-| Offline build | `exports/spa`, 16 MB, no runtime network calls |
-| PDF | All click states (223 pages), handout (71 pages), speaker notes (33 pages) |
+| Offline build | `exports/spa`, 23 MB including the 5.3 MB DICOM sample pack, no runtime network calls |
+| PDF | All click states (246 pages), handout (77 pages), speaker notes (35 pages); DICOM slides render their real files |
 | Notebook | Executes top to bottom on GPU (RTX PRO 4000) in a clean env; outputs saved; demo slides show its cells and outputs |
 
 ## Tests performed
 
 1. **Static checks** (`npm run check`): slide count, sections, notes, placeholders, citation keys, honesty tags, run files, word limit (no slide over the limit), timing.
-2. **Tokenizer** (`scripts/test-wordpiece.mjs`): the in-page WordPiece tokenizer matches the Hugging Face BiomedBERT tokenizer on 6 sentences, tokens and IDs.
+2. **DICOM reader** (`scripts/test-dicom.mjs`): the in-browser reader (`composables/dicom.ts`, dicom-parser) matches pydicom on all 7 sample files: tags, pixel min/max/mean after rescale, and the PET SUV factor. Privacy gate in `prepare_deck_assets.py`: identifying tags empty, private tags removed; every image inspected for burned-in text (ultrasound header band blacked out).
+3. **Tokenizer** (`scripts/test-wordpiece.mjs`): the in-page WordPiece tokenizer matches the Hugging Face BiomedBERT tokenizer on 6 sentences, tokens and IDs.
 3. **Links** (`npm run check:urls`): 29 of 34 URLs return 200; the 5 that return 403 are publisher DOI pages (NEJM AI ×2, RSNA, Wiley, Oxford) that block scripts, each confirmed through Crossref.
 4. **Visual review**: every slide screenshotted at its first and last click state (and intermediate states for step-driven artifacts) and inspected; overflow, overlap and clipping fixed.
-5. **Interaction tests** (Playwright): the windowing slider changes the rendered CT; typing in the tokenizer re-tokenizes ("Pneumothorax" → one token); removing the top description in the ranking viewer re-ranks it. Typing does not advance the slide.
+5. **Interaction tests** (Playwright): the DICOM viewer switches files and opens a local `.dcm` (read in the browser, no upload); the ultrasound frame slider and PET/CT opacity slider change the image; the windowing slider changes the rendered CT; typing in the tokenizer re-tokenizes ("Pneumothorax" → one token); removing the top description in the ranking viewer re-ranks it. Typing does not advance the slide.
 6. **PDF**: canvas-based slides (windowing, three planes, segmentation overlay) render correctly in the export.
 7. **Facts in notes checked against data**: nodule HU (83) and stored value (1,107); nodule in the left lower lobe (99.9% of reader voxels inside TotalSegmentator's label); reader agreement; all model numbers read from run files.
 
@@ -42,6 +43,7 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 | MedSAM vs 4 radiologists (nodule slice) | Dice 0.75–0.77; readers among themselves 0.91–0.94 (slice), 0.84–0.90 (3D) |
 | TotalSegmentator | lungs 3.7 L, heart 370 ml; nodule 99.9% inside "lung" |
 | BiomedCLIP speed | 0.024 s per image on GPU, 1.2 s on CPU |
+| PET SUV from DICOM tags | 300 MBq FDG, scan 60.1 min after injection, 205.3 MBq left, 61 kg; tumour SUVmax 18.1 (3D), 14.2 on the shown slice; volume 134 ml |
 
 ## Known limitations and open items
 

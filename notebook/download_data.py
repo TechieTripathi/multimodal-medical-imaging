@@ -2,6 +2,7 @@
 
 Usage (from notebook/):
   python download_data.py            # workflows A–C: LIDC-IDRI-0001 (≈ 90 MB) and UPENN-GBM-00001 MRI (≈ 80 MB)
+  python download_data.py --dicom    # originals behind the DICOM sample pack: mammogram, ultrasound cine, PET/CT (≈ 480 MB)
   python download_data.py --all      # also the extra datasets the slides use (≈ 4 GB, see README)
 
 All data are public and de-identified by their publishers; check each licence before reuse.
@@ -59,6 +60,24 @@ def core():
                 name=lambda s: s['SeriesDescription'].split(':')[0].strip().replace(' ', '_').replace('-', ''))
 
 
+def dicom_originals():
+    """Originals behind ../public/dicom/ (Workflow D; the pack itself needs no download)."""
+    import pandas as pd
+    # CMMD mammograms of patient D2-0333 (malignant mass, Luminal B) and the clinical table. CC BY 4.0.
+    get('https://www.cancerimagingarchive.net/wp-content/uploads/CMMD_clinicaldata_revision.xlsx',
+        os.path.join(RAW, 'cmmd', 'CMMD_clinicaldata_revision.xlsx'))
+    tcia_series('CMMD', 'D2-0333', folder='cmmd', name=lambda s: 'D2-0333')
+    # One multi-frame liver ultrasound (B-mode + contrast) from B-mode-and-CEUS-Liver, patient LiverUS-01. CC BY 4.0.
+    series = requests.get(f'{NBIA}/getSeries', params={'Collection': 'B-mode-and-CEUS-Liver', 'PatientID': 'LiverUS-01'}, timeout=60).json()[0]
+    sops = requests.get(f'{NBIA}/getSOPInstanceUIDs', params={'SeriesInstanceUID': series['SeriesInstanceUID']}, timeout=60).json()
+    get(f"{NBIA}/getSingleImage?SeriesInstanceUID={series['SeriesInstanceUID']}&SOPInstanceUID={sops[7]['SOPInstanceUID']}",
+        os.path.join(RAW, 'us', 'inst_8.dcm'))
+    # FDG-PET-CT-Lesions, lung cancer patient PETCT_b899150306: PET, CT and lesion SEG (defaced release, CC BY 4.0)
+    get('https://www.cancerimagingarchive.net/wp-content/uploads/Clinical-Metadata-FDG-PET_CT-Lesions.csv',
+        os.path.join(RAW, 'petct', 'Clinical-Metadata-FDG-PET_CT-Lesions.csv'))
+    tcia_series('FDG-PET-CT-Lesions', 'PETCT_b899150306', folder='petct', name=lambda s: s['Modality'])
+
+
 def extras():
     # Indiana University chest X-rays (PNG) and reports, via Open-i. Check the licence on openi.nlm.nih.gov.
     base = 'https://openi.nlm.nih.gov/imgs/collections'
@@ -81,6 +100,8 @@ def extras():
 
 if __name__ == '__main__':
     core()
+    if '--dicom' in sys.argv or '--all' in sys.argv:
+        dicom_originals()
     if '--all' in sys.argv:
         extras()
     print('done')

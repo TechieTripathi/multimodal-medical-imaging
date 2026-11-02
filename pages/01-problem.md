@@ -66,7 +66,7 @@ sources: [lidc2015data, fedorov2018lidcdicom]
 <EvidenceCase />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show that even one patient arrives as several kinds of evidence, each answering different questions.
 **Say:** This is a real, anonymised patient from a public archive. First, a chest X-ray. [click] Then a CT scan: 133 thin slices; this is the one through the widest part of a lump in the left lung, circled. [click] Four radiologists independently outlined the lump and filled in a structured form. This one wrote: solid nodule, about 32 millimetres, spiky edge, and rated it 5 out of 5 for suspicion of cancer. [click] And what is missing: the history. Symptoms, smoking, earlier scans, blood tests. A clinician would never decide without them, and the public data does not include them.
 **Example:** Think of a detective with a photograph, a witness statement and a background file. Each one answers different questions.
@@ -93,7 +93,7 @@ sources: [lidc2015data, bakas2021upenndata, vandenheuvel2018hc18, kather2018crcd
 <ModalityGallery />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Recognise the main imaging modalities and that they are stored differently.
 **Say:** X-ray: a shadow picture, cheap and fast. [click] CT: many X-ray slices stacked into a 3D volume, which is our patient. [click] MRI uses magnetism instead of radiation and can show the same tissue with different contrasts. [click] Ultrasound uses sound echoes and is live; this one is a baby's head. [click] Pathology: thin slices of tissue, stained and photographed under a microscope. [click] And the retina, photographed through the pupil. [click] Notice the stamps: radiology images are usually stored as DICOM, the hospital standard we will open up in Part 4. Microscope slides and eye photos often are not.
 **Example:** All six images in this gallery come from public, openly licensed research datasets, and you will see several of them again later.

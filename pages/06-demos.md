@@ -23,14 +23,14 @@ run: notebook.json
 sources: [lidc2015data, zhang2025biomedclip, wasserthal2023totalseg, ma2024medsam]
 ---
 
-# Three workflows on one patient
+# Four workflows on real data
 
 <DemoPlan />
 
 <!--
 **Time:** ~2 min
 **Objective:** Set out the demos, the data, the models and real run times.
-**Say:** Three workflows, all on the same patient. A: open the DICOM CT and look at it properly; no AI yet. B: ask BiomedCLIP which description fits our patient's X-ray. C: outline the anatomy and the nodule with two segmentation models. The times are measured: BiomedCLIP takes about two hundredths of a second per image on this GPU and over a second on a laptop CPU.
+**Say:** Four workflows. The first three use our patient. A: open the DICOM CT and look at it properly; no AI yet. B: ask BiomedCLIP which description fits our patient's X-ray. C: outline the anatomy and the nodule with two segmentation models. D: open real DICOM files from six kinds of scanner, ending with a PET SUV calculation. The times are measured: BiomedCLIP takes about two hundredths of a second per image on this GPU and over a second on a laptop CPU.
 **Example:** Participants can run A and B on a laptop; C is better on a GPU, and the notebook uses a fast mode on CPU.
 **Try / Notice:** None.
 **Ask:** None.
@@ -90,7 +90,7 @@ sources: [lidc2015data]
 <NotebookCell cell="A2" :lines="[2, 3, 5, 6, 7]" :steps="[[2, 3], [5, 6, 7]]" figure />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Convert to Hounsfield units and apply windows in code; distinguish visualisation from inference.
 **Say:** Two lines turn the stack of files into a volume in Hounsfield units: read the pixels, then multiply by the slope and add the intercept from the header. [click] And a window is just three lines: choose the lowest value to show, scale, and clip. [click] Here is the figure the notebook drew: lung, soft tissue and bone windows of the same slice. Nothing so far is AI. This is visualisation: it changes how we see, not what the data say.
 **Example:** The sliders from Part 4, now as code.
@@ -121,10 +121,10 @@ sources: [zhang2025biomedclip]
 <NotebookCell cell="B1" :lines="[5, 6, 7, 10, 11, 12, 13]" :steps="[[5, 6, 7], [10, 11, 12, 13]]" :out-lines="2" />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show the conversion from DICOM to a model input in code.
 **Say:** Three lines load BiomedCLIP and its own preprocessing, downloaded from its public page. [click] BiomedCLIP was trained on ordinary pictures, so we must convert our 14-bit DICOM X-ray ourselves: choose a window that keeps 99% of the values, make an 8-bit image, then let the model's preprocessing resize it to 224 by 224 and normalise it. The output confirms the shape: one image, three colour channels, 224 by 224.
-**Example:** The preparation pipeline from slide 36, in four lines of code.
+**Example:** The preparation pipeline from slide 40, in four lines of code.
 **Try / Notice:** Line 11: the window is our choice, and it affects every score that follows.
 **Ask:** What else could we have chosen for the window?
 **Caveat:** The model expects colour images; the grey X-ray is copied into three identical channels.
@@ -257,6 +257,37 @@ sources: [fedorov2018lidcdicom, ma2024medsam, wasserthal2023totalseg]
 **Likely failure modes:** MedSAM download needs internet; GPU memory is enough on most laptops' CPUs, just slower.
 **Fallback:** This slide.
 **Sources:** fedorov2018lidcdicom; ma2024medsam; wasserthal2023totalseg. Run: data/runs/segmentation.json.
+-->
+
+---
+section: 6
+layout: artifact
+clicks: 2
+tag: actual
+tagText: 'notebook cell D3, as run'
+run: notebook.json
+sources: [gatidis2022fdgpetct, dicomstandard]
+---
+
+::title::
+# Demo D: real DICOM from six scanners
+
+::default::
+<NotebookCell cell="D3" :lines="[3, 4, 5, 6, 7]" :steps="[[3, 4, 5], [6, 7]]" :out-lines="2" />
+
+<!--
+**Time:** ~2 min
+**Objective:** Read the sample pack in code, ending with the SUV calculation.
+**Say:** Workflow D in the notebook opens every file in the sample pack and prints the tags that matter for each kind of scanner: units for CT and PET, frames for ultrasound, laterality for the mammogram. This cell is the PET one. [click] It reads the timing and dose from the file. [click] And turns becquerels into SUV. The output matches the slide we saw in Part 4, because it is the same file.
+**Example:** Four lines of arithmetic, but every input comes from the DICOM header.
+**Try / Notice:** None.
+**Ask:** Which tag would you double-check first if an SUV looked wrong?
+**Caveat:** The notebook also draws the PET on the CT in millimetres (cell D4).
+**Steps:** Run D1 (all files), D2 (mammogram and ultrasound), D3 (SUV), D4 (fusion figure).
+**Expected observations:** D3 prints 300 MBq, 60.1 min, 205.3 MBq left, and a maximum SUV of 14.2 on this slice (18.1 over the whole tumour in 3D).
+**Likely failure modes:** Running from another folder: the pack is at ../public/dicom/ relative to the notebook.
+**Fallback:** This slide.
+**Sources:** gatidis2022fdgpetct; dicomstandard.
 -->
 
 ---

@@ -472,6 +472,243 @@ def stage_mri():
     print('mri: slice', k, metrics)
 
 
+# ---------------------------------------------------------------- real DICOM teaching copies
+
+DICOM_OUT = os.path.join(HERE, '..', 'public', 'dicom')
+DOI = {'lidc': '10.7937/K9/TCIA.2015.LO9QL9SX', 'upenn': '10.7937/TCIA.709X-DN49', 'cmmd': '10.7937/tcia.eqde-4b16',
+       'us': '10.7937/TCIA.2021.v4z7-tc39', 'petct': '10.7937/gkr0-xv29'}
+PRIVACY_TAGS = ['PatientBirthDate', 'PatientAddress', 'AccessionNumber', 'ReferringPhysicianName', 'InstitutionName',
+                'InstitutionAddress', 'OperatorsName', 'PerformingPhysicianName', 'OtherPatientIDs']
+
+
+def write_teaching_copy(ds, pixels, name, changes, doi, scale=1):
+    """Write a real DICOM file for the deck: every public tag kept, private tags removed, pixels replaced
+    by `pixels` (downsampled by `scale`, or unchanged), new SOP Instance UID, and the change recorded in
+    DerivationDescription. Uncompressed Explicit VR Little Endian, so the browser needs no codecs."""
+    from pydicom.uid import ExplicitVRLittleEndian, generate_uid
+    ds = ds.copy()
+    ds.remove_private_tags()
+    for kw in PRIVACY_TAGS:
+        if kw in ds and str(ds.data_element(kw).value).strip():
+            raise ValueError(f'{name}: {kw} is not empty')
+    pixels = np.ascontiguousarray(pixels)
+    if 'NumberOfFrames' in ds or pixels.ndim == (4 if ds.get('SamplesPerPixel', 1) == 3 else 3):
+        ds.NumberOfFrames = pixels.shape[0]
+        rows, cols = pixels.shape[1:3]
+    else:
+        rows, cols = pixels.shape[:2]
+    ds.Rows, ds.Columns = int(rows), int(cols)
+    for kw in ['PixelSpacing', 'ImagerPixelSpacing']:
+        if kw in ds and scale != 1:
+            setattr(ds, kw, [f'{float(v) * scale:.6g}' for v in ds.data_element(kw).value])
+    bits = 8 if pixels.dtype == np.uint8 else 16
+    ds.BitsAllocated, ds.BitsStored, ds.HighBit = bits, min(int(ds.get('BitsStored', bits)), bits), min(int(ds.get('BitsStored', bits)), bits) - 1
+    ds.PixelData = pixels.tobytes()
+    ds['PixelData'].VR = 'OB' if bits == 8 else 'OW'
+    if 'ImageType' in ds:
+        it = list(ds.ImageType)
+        ds.ImageType = ['DERIVED'] + it[1:]
+    uid = generate_uid()
+    ds.SOPInstanceUID = uid
+    ds.file_meta.MediaStorageSOPInstanceUID = uid
+    ds.file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+    ds.DerivationDescription = f'Teaching copy for an FDP slide deck: {changes}. Source https://doi.org/{doi} (CC BY).'[:1024]
+    os.makedirs(DICOM_OUT, exist_ok=True)
+    path = os.path.join(DICOM_OUT, name)
+    ds.save_as(path, enforce_file_format=True)
+    return path
+
+
+def block_mean(a, f):
+    """Downsample the first two (spatial) axes of `a` by an integer factor `f` by averaging."""
+    h, w = (a.shape[0] // f) * f, (a.shape[1] // f) * f
+    a = a[:h, :w].astype(np.float32)
+    return a.reshape(h // f, f, w // f, f, *a.shape[2:]).mean(axis=(1, 3))
+
+
+def reference(path, extra=None):
+    """What pydicom reads back from a teaching copy: key tags and pixel statistics in stored units,
+    after rescale. The browser parser is checked against these (scripts/test-dicom.mjs)."""
+    ds = pydicom.dcmread(path)
+    keys = ['Modality', 'Rows', 'Columns', 'BitsStored', 'PhotometricInterpretation', 'SamplesPerPixel', 'NumberOfFrames',
+            'PixelSpacing', 'ImagerPixelSpacing', 'RescaleSlope', 'RescaleIntercept', 'Units', 'ImageLaterality',
+            'FrameTime', 'WindowCenter', 'WindowWidth', 'Manufacturer', 'SeriesDescription', 'PatientID', 'BodyPartExamined']
+    tags = {}
+    for k in keys:
+        if k in ds:
+            v = ds.data_element(k).value
+            tags[k] = [float(x) for x in v] if isinstance(v, pydicom.multival.MultiValue) else (v if isinstance(v, (int, float)) else str(v))
+    a = ds.pixel_array.astype(np.float64)
+    a = a * float(ds.get('RescaleSlope', 1)) + float(ds.get('RescaleIntercept', 0))
+    return {'file': os.path.basename(path), 'bytes': os.path.getsize(path), 'tags': tags,
+            'pixels': {'min': round(float(a.min()), 3), 'max': round(float(a.max()), 3), 'mean': round(float(a.mean()), 3)},
+            **(extra or {})}
+
+
+def dcm_time(s):
+    """Seconds since midnight from a DICOM TM value (HHMMSS.frac)."""
+    s = str(s)
+    return int(s[0:2]) * 3600 + int(s[2:4]) * 60 + float(s[4:] or 0)
+
+
+def suv_factor(ds):
+    """Body-weight SUV factor for a PET slice in Bq/ml, decay-corrected to series start:
+    SUV = value × weight (g) / (injected dose (Bq) × 2^(−Δt / half-life))."""
+    r = ds.RadiopharmaceuticalInformationSequence[0]
+    dt_s = dcm_time(ds.SeriesTime) - dcm_time(r.RadiopharmaceuticalStartTime)
+    dose_now = float(r.RadionuclideTotalDose) * 2 ** (-dt_s / float(r.RadionuclideHalfLife))
+    return float(ds.PatientWeight) * 1000 / dose_now, dt_s, dose_now
+
+
+def read_pet_volume(d):
+    """PET slices in Bq/ml, each with its own rescale slope (PET slopes differ slice to slice)."""
+    files = sorted(glob.glob(os.path.join(d, '*.dcm')), key=lambda f: float(pydicom.dcmread(f, stop_before_pixels=True).ImagePositionPatient[2]))
+    hs = [pydicom.dcmread(f) for f in files]
+    vol = np.stack([h.pixel_array * float(h.RescaleSlope) + float(h.get('RescaleIntercept', 0)) for h in hs]).astype(np.float32)
+    img = sitk.GetImageFromArray(vol)
+    sp = [float(x) for x in hs[0].PixelSpacing]
+    dz = float(hs[1].ImagePositionPatient[2]) - float(hs[0].ImagePositionPatient[2])
+    img.SetSpacing((sp[1], sp[0], dz))
+    img.SetOrigin(tuple(float(x) for x in hs[0].ImagePositionPatient))
+    return img, files, hs
+
+
+def read_seg_on(seg_path, ref):
+    """A DICOM SEG mask (all segments merged) resampled onto `ref`'s grid."""
+    ds = pydicom.dcmread(seg_path)
+    frames = ds.pixel_array.astype(np.uint8)
+    if frames.ndim == 2:
+        frames = frames[None]
+    shared = ds.SharedFunctionalGroupsSequence[0]
+    sp = [float(x) for x in shared.PixelMeasuresSequence[0].PixelSpacing]
+    zs = [float(f.PlanePositionSequence[0].ImagePositionPatient[2]) for f in ds.PerFrameFunctionalGroupsSequence]
+    pos0 = [float(x) for x in ds.PerFrameFunctionalGroupsSequence[0].PlanePositionSequence[0].ImagePositionPatient]
+    uz = sorted(set(zs))
+    vol = np.zeros((len(uz), frames.shape[1], frames.shape[2]), np.uint8)
+    for i, z in enumerate(zs):
+        vol[uz.index(z)] |= frames[i]
+    img = sitk.GetImageFromArray(vol)
+    img.SetSpacing((sp[1], sp[0], (uz[1] - uz[0]) if len(uz) > 1 else 1.0))
+    img.SetOrigin((pos0[0], pos0[1], uz[0]))
+    # Row and column directions from the SEG's own orientation (this one stores rows bottom-up)
+    r_, c_ = [float(x) for x in shared.PlaneOrientationSequence[0].ImageOrientationPatient[:3]], [float(x) for x in shared.PlaneOrientationSequence[0].ImageOrientationPatient[3:]]
+    img.SetDirection((r_[0], c_[0], 0, r_[1], c_[1], 0, r_[2], c_[2], 1))
+    return sitk.Resample(img, ref, sitk.Transform(), sitk.sitkNearestNeighbor, 0)
+
+
+def stage_dicom_examples():
+    files = []
+
+    # 1. CT: one original LIDC slice through the nodule (pixels unchanged)
+    k = json.load(open(out('ct', 'meta.json')))['nodule_slice']
+    _, ct_files = read_ct()
+    ds = pydicom.dcmread(ct_files[k])
+    files.append(reference(write_teaching_copy(ds, ds.pixel_array, 'ct-lidc-0001.dcm', 'private tags removed; pixels unchanged', DOI['lidc']),
+                           {'title': 'Chest CT slice', 'credit': 'LIDC-IDRI (TCIA) · CC BY 3.0'}))
+
+    # 2. X-ray: LIDC frontal radiograph, letters beside the marker masked, downsampled 4×
+    ds = pydicom.dcmread(sorted(glob.glob(os.path.join(series_dir('DX')[0], '*.dcm')))[0])
+    a = ds.pixel_array.astype(np.float32)
+    a[50:240, 1785:1870] = np.median(a[50:240, 1755:1785])
+    small = np.round(block_mean(a, 4)).astype(np.uint16)
+    files.append(reference(write_teaching_copy(ds, small, 'xray-lidc-0001.dcm', 'burned-in letters masked; downsampled 4x', DOI['lidc'], 4),
+                           {'title': 'Chest X-ray', 'credit': 'LIDC-IDRI (TCIA) · CC BY 3.0'}))
+
+    # 3. MRI: the original FLAIR slice nearest the lesion slice used on the MRI slides
+    flair_dir = os.path.join(RAW, 'upenn', 't2_Flair_axial')
+    t1 = read_series(os.path.join(RAW, 'upenn', 't1_axial'))
+    z_target = t1.TransformIndexToPhysicalPoint((0, 0, 70))[2]
+    fl = sorted(glob.glob(os.path.join(flair_dir, '*.dcm')), key=lambda f: abs(float(pydicom.dcmread(f, stop_before_pixels=True).ImagePositionPatient[2]) - z_target))
+    ds = pydicom.dcmread(fl[0])
+    files.append(reference(write_teaching_copy(ds, ds.pixel_array, 'mri-flair-upenn-00001.dcm', 'private tags removed; pixels unchanged', DOI['upenn']),
+                           {'title': 'Brain MRI, FLAIR', 'credit': 'UPENN-GBM (TCIA) · CC BY 4.0'}))
+
+    # 4. Ultrasound: B-mode + contrast cine loop, every 5th frame, downsampled 4×, header band blacked out
+    ds = pydicom.dcmread(glob.glob(os.path.join(RAW, 'us', 'inst_*.dcm'))[0])
+    orig = {'frames': int(ds.NumberOfFrames), 'frame_time_ms': float(ds.FrameTime), 'rows': int(ds.Rows), 'cols': int(ds.Columns)}
+    a = ds.pixel_array[::5].copy()
+    a[:, :48] = 0  # header band (already pixel-scrubbed by TCIA) blacked out completely
+    small = np.stack([block_mean(f, 4) for f in a]).round().astype(np.uint8)
+    ds.FrameTime = f'{float(ds.FrameTime) * 5:.4f}'
+    files.append(reference(write_teaching_copy(ds, small, 'us-liver-ceus.dcm',
+                                               f"every 5th of {orig['frames']} frames kept (FrameTime x5); downsampled 4x; top text band blacked out", DOI['us'], 4),
+                           {'title': 'Liver ultrasound cine (B-mode + contrast)', 'credit': 'B-mode-and-CEUS-Liver (TCIA) · CC BY 4.0',
+                            'original': orig}))
+
+    # 5. Mammography: CMMD malignant mass, right breast, downsampled 4×, with its clinical row
+    import pandas as pd
+    clin = pd.read_excel(os.path.join(RAW, 'cmmd', 'CMMD_clinicaldata_revision.xlsx'))
+    row = clin[clin.ID1 == 'D2-0333'].iloc[0]
+    mg = [f for f in sorted(glob.glob(os.path.join(RAW, 'cmmd', 'D2-0333', '*.dcm'))) if pydicom.dcmread(f, stop_before_pixels=True).ImageLaterality == row.LeftRight]
+    ds = pydicom.dcmread(mg[0])
+    small = np.round(block_mean(ds.pixel_array, 4)).astype(np.uint8)
+    files.append(reference(write_teaching_copy(ds, small, 'mammo-cmmd-d2-0333.dcm', 'downsampled 4x', DOI['cmmd'], 4),
+                           {'title': 'Mammogram', 'credit': 'CMMD (TCIA) · CC BY 4.0',
+                            'clinical': {'age': int(row.Age), 'side': row.LeftRight, 'abnormality': row.abnormality,
+                                         'classification': row.classification, 'subtype': row.subtype}}))
+
+    # 6. PET: the original slice with the most lesion, plus the PET/CT fusion arrays
+    pet, pet_files, pet_hs = read_pet_volume(os.path.join(RAW, 'petct', 'PT'))
+    r = sitk.ImageSeriesReader()
+    r.SetFileNames(r.GetGDCMSeriesFileNames(os.path.join(RAW, 'petct', 'CT')))
+    ct = r.Execute()
+    seg_ct = sitk.GetArrayFromImage(read_seg_on(glob.glob(os.path.join(RAW, 'petct', 'SEG', '*.dcm'))[0], ct))
+    seg_pet = sitk.GetArrayFromImage(read_seg_on(glob.glob(os.path.join(RAW, 'petct', 'SEG', '*.dcm'))[0], pet))
+    kp = int(np.argmax(seg_pet.sum(axis=(1, 2))))
+    ds = pet_hs[kp]
+    factor, dt_s, dose_now = suv_factor(ds)
+    files.append(reference(write_teaching_copy(ds, ds.pixel_array, 'pet-fdg-lung.dcm', 'private tags removed; pixels unchanged', DOI['petct']),
+                           {'title': 'FDG PET slice', 'credit': 'FDG-PET-CT-Lesions (TCIA) · CC BY 4.0',
+                            'suv': {'factor': factor, 'minutes_after_injection': round(dt_s / 60, 2), 'dose_at_scan_mbq': round(dose_now / 1e6, 2)}}))
+    ds_ct = pydicom.dcmread(sorted(r.GetFileNames(), key=lambda f: abs(float(pydicom.dcmread(f, stop_before_pixels=True).ImagePositionPatient[2]) - float(ds.ImagePositionPatient[2])))[0])
+    files.append(reference(write_teaching_copy(ds_ct, ds_ct.pixel_array, 'ct-fdg-lung.dcm', 'private tags removed; pixels unchanged', DOI['petct']),
+                           {'title': 'CT slice from the same PET/CT', 'credit': 'FDG-PET-CT-Lesions (TCIA) · CC BY 4.0'}))
+
+    # Fusion arrays on the CT grid: CT (HU), PET (SUV), lesion mask, coronal SUV maximum-intensity projection
+    suv = sitk.GetArrayFromImage(sitk.Resample(pet, ct, sitk.Transform(), sitk.sitkLinear, 0.0)) * factor
+    hu = sitk.GetArrayFromImage(ct)
+    kc = int(np.argmax(seg_ct.sum(axis=(1, 2))))
+    hu[kc].astype('<i2').tofile(out('petct', 'ct_hu.bin'))
+    np.clip(suv[kc] * 100, 0, 65535).astype('<u2').tofile(out('petct', 'suv_x100.bin'))
+    lesion = seg_ct[kc] > 0
+    alpha = Image.fromarray((lesion * 255).astype(np.uint8))
+    rgba = Image.new('RGBA', alpha.size, (255, 255, 255, 0))
+    rgba.putalpha(alpha)
+    rgba.save(out('petct', 'lesion.png'))
+    # Outline (2 px) of the expert lesion mask, cyan on transparent, for drawing over the fused image
+    er = sitk.GetArrayFromImage(sitk.BinaryErode(sitk.GetImageFromArray(lesion.astype(np.uint8)), [2, 2])).astype(bool)
+    edge = lesion & ~er
+    rgba = np.zeros((*edge.shape, 4), np.uint8)
+    rgba[edge] = [0, 229, 255, 255]
+    Image.fromarray(rgba).save(out('petct', 'lesion_edge.png'))
+    pet_suv = sitk.GetArrayFromImage(pet) * factor
+    mip = pet_suv.max(axis=1)[::-1]  # coronal, head at top
+    sz = pet.GetSpacing()
+    mip_img = Image.fromarray((255 - np.clip(mip / 8, 0, 1) * 255).astype(np.uint8))
+    mip_img = mip_img.resize((mip.shape[1], int(round(mip.shape[0] * sz[2] / sz[0]))), Image.BILINEAR)
+    mip_img.save(out('petct', 'mip_coronal.png'))
+    les_suv = pet_suv[seg_pet > 0]
+    vox_ml = sz[0] * sz[1] * sz[2] / 1000
+    meta = {'source': 'FDG-PET-CT-Lesions, patient PETCT_b899150306 (lung cancer), TCIA, CC BY 4.0 (defaced release)',
+            'grid': [int(x) for x in hu.shape[1:]], 'ct_slice': kc, 'pet_slice': kp, 'ct_spacing_mm': [round(x, 4) for x in ct.GetSpacing()],
+            'suv_factor': factor, 'suv_scale': 100, 'mip_suv_max_display': 8,
+            'lesion': {'suv_max': round(float(les_suv.max()), 2), 'suv_mean': round(float(les_suv.mean()), 2),
+                       'volume_ml': round(float((seg_pet > 0).sum() * vox_ml), 1), 'slice_area_px': int(lesion.sum())},
+            'tags': {'weight_kg': float(ds.PatientWeight), 'dose_mbq': float(ds.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose) / 1e6,
+                     'half_life_s': float(ds.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife),
+                     'injection_time': str(ds.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime),
+                     'series_time': str(ds.SeriesTime), 'units': str(ds.Units), 'decay_correction': str(ds.DecayCorrection),
+                     'radiopharmaceutical': str(ds.RadiopharmaceuticalInformationSequence[0].Radiopharmaceutical)}}
+    json.dump(meta, open(out('petct', 'meta.json'), 'w'), indent=1)
+    json.dump({'note': 'Teaching copies of real DICOM files from public TCIA collections. Each file records its changes in DerivationDescription.',
+               'files': files}, open(os.path.join(DICOM_OUT, 'manifest.json'), 'w'), indent=1)
+    # The same manifest for the slide components (Vite cannot import from public/)
+    json.dump({'files': files}, open(out('dicom_examples', 'manifest.json'), 'w'), indent=1)
+    for f in files:
+        print(f"dicom: {f['file']:28s} {f['bytes'] / 1e6:5.2f} MB  {f['tags'].get('Modality')}  {f['tags'].get('Rows')}x{f['tags'].get('Columns')}  frames {f['tags'].get('NumberOfFrames', 1)}")
+    print('petct:', meta['lesion'], 'SUV factor', round(factor, 6))
+
+
 if __name__ == '__main__':
     stages = sys.argv[1:] or ['ct', 'dx']
     for s in stages:

@@ -240,6 +240,51 @@ mask = proc.image_processor.post_process_masks(out_.pred_masks.sigmoid().cpu(), 
                                                inp['reshaped_input_sizes'].cpu(), binarize=False)[0][0, 0].numpy() > 0.5
 print('MedSAM vs each radiologist (Dice on this slice):', [round(dice(mask, r[z]), 2) for r in readers])"""),
 
+    ('md', None, """## Workflow D — Real DICOM files from six kinds of scanner
+
+The sample pack in `../public/dicom/` holds small *teaching copies* of real DICOM files from public collections: every original tag kept, private tags removed, pixels downsampled where needed, and the change written into each file's `DerivationDescription`. The same files open in the deck's DICOM viewer slide and can be downloaded from it."""),
+    ('code', 'D1', """# D1. Open every file and print the tags that matter for each kind of scan
+pack = sorted(glob.glob('../public/dicom/*.dcm'))
+for f in pack:
+    d = pydicom.dcmread(f)
+    frames = int(d.get('NumberOfFrames', 1))
+    print(f"{os.path.basename(f):28s} {d.Modality:3s} {d.Rows}x{d.Columns}"
+          f"{f' x{frames} frames' if frames > 1 else ''}  {d.PhotometricInterpretation:11s} {d.BitsStored}-bit"
+          f"  units: {'HU' if d.Modality == 'CT' else d.get('Units', '-')}")
+print()
+print('Change recorded in one file:', pydicom.dcmread(pack[0]).DerivationDescription)"""),
+    ('code', 'D2', """# D2. Modality-specific details: which breast (mammogram), and an ultrasound file is a video
+mg = pydicom.dcmread('../public/dicom/mammo-cmmd-d2-0333.dcm')
+print('Mammogram: ImageLaterality =', mg.ImageLaterality, '| ViewPosition =', mg.get('ViewPosition', 'not recorded'))
+us = pydicom.dcmread('../public/dicom/us-liver-ceus.dcm')
+cine = us.pixel_array                                   # (frames, rows, columns, 3): colour video
+print('Ultrasound:', cine.shape, '| FrameTime', float(us.FrameTime), 'ms | duration', round(cine.shape[0] * float(us.FrameTime) / 1000, 1), 's')
+fig, axes = plt.subplots(1, 3, figsize=(12, 3))
+for ax, k in zip(axes, [0, cine.shape[0] // 2, cine.shape[0] - 1]):
+    ax.imshow(cine[k]); ax.set_title(f'frame {k + 1}'); ax.axis('off')
+plt.show()"""),
+    ('code', 'D3', """# D3. PET pixels are Bq/ml; the file's own tags turn them into SUV (body weight, decay-corrected)
+pet = pydicom.dcmread('../public/dicom/pet-fdg-lung.dcm')
+r = pet.RadiopharmaceuticalInformationSequence[0]
+tm = lambda t: int(t[:2]) * 3600 + int(t[2:4]) * 60 + float(t[4:])
+minutes = (tm(pet.SeriesTime) - tm(r.RadiopharmaceuticalStartTime)) / 60
+dose_now = float(r.RadionuclideTotalDose) * 2 ** (-minutes * 60 / float(r.RadionuclideHalfLife))
+suv = pet.pixel_array * float(pet.RescaleSlope) * float(pet.PatientWeight) * 1000 / dose_now
+print(f'{r.Radiopharmaceutical}: {float(r.RadionuclideTotalDose) / 1e6:.0f} MBq, scan {minutes:.1f} min later'
+      f' -> {dose_now / 1e6:.1f} MBq left; weight {pet.PatientWeight} kg; max SUV on this slice {suv.max():.1f}')"""),
+    ('code', 'D4', """# D4. PET/CT fusion: the PET and CT files share a frame of reference, so their positions line up
+ct2 = pydicom.dcmread('../public/dicom/ct-fdg-lung.dcm')
+hu2 = ct2.pixel_array * float(ct2.RescaleSlope) + float(ct2.RescaleIntercept)
+print('Same frame of reference:', pet.FrameOfReferenceUID == ct2.FrameOfReferenceUID,
+      '| CT', ct2.Rows, 'px at', float(ct2.PixelSpacing[0]), 'mm; PET', pet.Rows, 'px at', float(pet.PixelSpacing[0]), 'mm')
+# Place both in millimetres and draw PET on top of CT
+ext = lambda d: [float(d.ImagePositionPatient[0]), float(d.ImagePositionPatient[0]) + d.Columns * float(d.PixelSpacing[1]),
+                 float(d.ImagePositionPatient[1]) + d.Rows * float(d.PixelSpacing[0]), float(d.ImagePositionPatient[1])]
+plt.figure(figsize=(5, 5))
+plt.imshow(window(hu2, 40, 400), cmap='gray', extent=ext(ct2))
+plt.imshow(np.ma.masked_less(suv, 1.5), cmap='hot', vmin=0, vmax=8, alpha=0.6, extent=ext(pet))
+plt.xlim(ext(ct2)[:2]); plt.ylim(ext(ct2)[2:]); plt.axis('off'); plt.title('PET (SUV) on CT'); plt.show()"""),
+
     ('md', None, """## Interpreting what you saw
 
 * **Cosine scores** rank options for one image. They are not probabilities, and not diagnoses. Small gaps mean the model is unsure.
@@ -255,7 +300,7 @@ json.dump({'device': torch.cuda.get_device_name(0) if DEVICE == 'cuda' else 'CPU
            'biomedclip_seconds_per_image': timings,
            'patient_xray_ranking': {candidates[i]: round(float(cosine[i]), 4) for i in np.argsort(-cosine)},
            'softmax_top2': [round(float(p[top2[0]]), 3), round(float(p[top2[1]]), 3)],
-           'medsam_dice_vs_readers': [round(float(dice(mask, r[z])), 3) for r in readers],
+           'medsam_dice_vs_readers': [round(float(dice(mask, rd[z])), 3) for rd in readers],
            'run_date': time.strftime('%Y-%m-%d')},
           open('../data/runs/notebook.json', 'w'), indent=1)
 print('saved ../data/runs/notebook.json')"""),

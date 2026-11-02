@@ -31,7 +31,7 @@ sources: [dicomstandard, lidc2015data]
 <DicomVsPng />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Explain why medicine uses DICOM rather than ordinary image files.
 **Say:** On the left, a slice saved as an ordinary picture: brightness from 0 to 255, no units, no size, no position. [click] On the right, the same slice as it really arrived: a DICOM file. Alongside the pixels it carries tags: who the patient is, how the scan was made, where the slice sits in the body, and how to turn the stored numbers into real units. Our file has 89 tags. [click] The pixel values are in Hounsfield units, and each pixel is 0.7 millimetres wide. The pixels take 99.6% of the file; the tags are tiny but essential.
 **Example:** A photograph versus a photograph with its full lab notebook stapled on.
@@ -85,15 +85,42 @@ sources: [dicomstandard, lidc2015data]
 <DicomTags />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show real metadata and its privacy implications.
 **Say:** These are real tags from our patient's file, in four groups. The first group is about who: name, birth date and accession number are empty, the patient ID is a code, and the date is shifted. That was done by the archive before release; in a hospital file, these fields hold real identities. [click] How it was acquired: GE scanner, 120 kV, 2.5 mm slices. [click] Where in space: 512 by 512 pixels, each 0.70 mm, and the exact position of this slice. [click] And how to read the pixels: 16 bits, and a slope and intercept, which we need on the next slide.
 **Example:** The privacy group is why you must never email a hospital DICOM file without de-identifying it.
 **Try / Notice:** Click the group buttons to move between them.
 **Ask:** Which of these would you remove before sharing data?
 **Caveat:** De-identification is more than blanking tags: identities can also hide in burned-in text, in private tags, or in a face reconstructed from a head CT.
-**Transition:** Those last two tags turn stored numbers into real units.
+**Transition:** Let's open real DICOM files and read their tags live.
 **Sources:** dicomstandard; lidc2015data.
+-->
+
+---
+section: 4
+layout: artifact
+clicks: 5
+tag: real-data
+tagText: 'real DICOM files (teaching copies of public TCIA data)'
+sources: [dicomstandard, lidc2015data, bakas2021upenndata, cmmd2021data, eisenbrey2021liverus, gatidis2022fdgpetct]
+---
+
+::title::
+# Open a real DICOM file
+
+::default::
+<DicomViewer />
+
+<!--
+**Time:** ~2.5 min
+**Objective:** Show real DICOM files from six kinds of scanner, read live in the browser.
+**Say:** Until now we looked at pictures made from DICOM files. This viewer opens the files themselves. A CT slice: 512 by 512, 16-bit, values in Hounsfield units, the scanner named in the file. [click] A chest X-ray: no units, just relative brightness. [click] An MRI slice: also no standard units, which is why MRI needs careful normalisation. [click] A mammogram. [click] A PET slice: its unit is becquerels per millilitre, radioactivity. [click] And an ultrasound file holds 21 frames, a video. Every line on the right is read from the file at this moment.
+**Example:** The same viewer works for any uncompressed DICOM file you have on your laptop.
+**Try / Notice:** Click the scan buttons; drag Level and Width; press "Download this .dcm" to take the file home; "Open your own .dcm" reads a file locally, nothing is uploaded.
+**Ask:** Which of these modalities do you use, and which tags would you check first?
+**Caveat:** These are teaching copies: private tags removed, some pixels downsampled, every change recorded inside the file (DerivationDescription). Compressed DICOM files (JPEG inside) are not supported by this simple viewer. Never open real patient files on a shared or public computer.
+**Transition:** Back to one of those numbers: stored values versus real units.
+**Sources:** dicomstandard; lidc2015data; bakas2021upenndata; cmmd2021data; eisenbrey2021liverus; gatidis2022fdgpetct.
 -->
 
 ---
@@ -193,15 +220,96 @@ sources: [bakas2021upenndata, bakas2022upenn]
 <MriSequences />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Explain why MRI comes as several sequences and why that matters for AI.
 **Say:** This is a different patient: a brain tumour from another public collection. MRI does not take one picture; it takes several, each tuned to a different tissue property. T1 shows anatomy. [click] T1 after contrast injection: leaky vessels and the tumour's edge light up. [click] T2: fluid is bright, so the swelling around the tumour shows. [click] FLAIR: like T2, but normal fluid is made dark, so the swelling stands out. A model that expects FLAIR but is given T2 is looking at a different picture.
 **Example:** Like photographing the same street in daylight, at night and in infrared.
 **Try / Notice:** Use the slider to wipe between the current sequence and the previous one.
 **Ask:** If a hospital names its series differently, how would software know which is FLAIR?
 **Caveat:** The four series were registered (aligned) to the T1 series in our notebook, and the slice was chosen by eye through the lesion. Diffusion-weighted imaging (DWI) is another common sequence, not shown.
-**Transition:** Finally, how does a DICOM image become a model's input?
+**Transition:** Other scanners store other things: an ultrasound file is a video.
 **Sources:** bakas2021upenndata — the data; bakas2022upenn — the collection.
+-->
+
+---
+section: 4
+layout: artifact
+clicks: 2
+tag: real-data
+tagText: 'real multi-frame ultrasound DICOM, B-mode-and-CEUS-Liver'
+sources: [eisenbrey2021liverus, dicomstandard]
+---
+
+::title::
+# An ultrasound file is a video
+
+::default::
+<UltrasoundCine />
+
+<!--
+**Time:** ~1.5 min
+**Objective:** Show multi-frame DICOM: ultrasound clips are videos with timing in their tags.
+**Say:** This is one DICOM file from a liver ultrasound. It is not a picture but a film: many frames, and a tag that says how far apart they are. [click] Play it. On the left, the normal grey ultrasound; on the right, the same view after a contrast agent was injected: the dark lesion and the vessels fill differently over time. [click] Side by side in every frame. A model reading ultrasound must decide which frames to use, or use them all.
+**Example:** Like a video file that carries its own frame rate.
+**Try / Notice:** Drag the frame slider; the time since the start updates from the FrameTime tag.
+**Ask:** Which frame would you give to a model, and why?
+**Caveat:** Teaching copy: every 5th frame of the original 105, downsampled, header band blacked out. The original frame interval was 107 ms.
+**Transition:** Mammograms carry their own context in tags too.
+**Sources:** eisenbrey2021liverus — the clip; dicomstandard — multi-frame attributes.
+-->
+
+---
+section: 4
+layout: artifact
+clicks: 2
+tag: real-data
+tagText: 'CMMD mammogram (DICOM) and its clinical table'
+sources: [cmmd2021data]
+---
+
+::title::
+# A mammogram file knows which side; the table knows the rest
+
+::default::
+<MammoTags />
+
+<!--
+**Time:** ~1.5 min
+**Objective:** Show context stored inside DICOM tags and alongside them in a clinical table.
+**Say:** A real mammogram from a public Chinese collection. The file records which breast it is, the right one, in the ImageLaterality tag. Notice it does not record the view; not every file is complete. [click] The dataset adds a table: age 85, a mass, malignant on biopsy, subtype Luminal B. [click] Image plus table is the simplest multimodal input. And the subtype came from a biopsy; no picture alone would give it.
+**Example:** A model that ignores laterality could mix up left and right breasts in a follow-up comparison.
+**Try / Notice:** The "not recorded" view.
+**Ask:** Which tags would you check before trusting a dataset?
+**Caveat:** Teaching copy downsampled 4×. CMMD images are stored at 8 bits; many clinical mammograms use more.
+**Transition:** PET goes further: its tags are needed to compute the number itself.
+**Sources:** cmmd2021data — images and clinical table.
+-->
+
+---
+section: 4
+layout: artifact
+clicks: 3
+tag: real-data
+tagText: 'real PET DICOM, FDG-PET-CT-Lesions'
+sources: [gatidis2022fdgpetct, boellaard2015petguideline]
+---
+
+::title::
+# PET values become SUV using the file’s own tags
+
+::default::
+<SuvFromTags />
+
+<!--
+**Time:** ~2 min
+**Objective:** Show a calculation that is impossible without DICOM metadata.
+**Say:** This is a real PET slice through a lung cancer. The pixels are radioactivity: becquerels per millilitre. Point at the tumour and you get tens of thousands. That number depends on how much tracer was given and when, so it cannot be compared between patients. [click] The file tells us what we need: the tracer, FDG, 300 megabecquerels injected at 9:10; the scan started an hour later; the patient weighed 61 kilograms. [click] FDG decays with a half-life of 110 minutes, so about 205 megabecquerels were left at the scan. [click] Divide by that dose per gram of body weight and we get the standardised uptake value, SUV. On this slice the hottest point is about 14; across the whole tumour in 3D, 18.
+**Example:** Like converting a raw count to a per-capita rate before comparing two cities.
+**Try / Notice:** Point at the tumour, then at normal tissue; after the last click the readout shows SUV.
+**Ask:** What happens to SUV if the injection time is entered wrongly?
+**Caveat:** This is body-weight SUV, decay-corrected to the series start (the file's DecayCorrection = START). Guidelines standardise these steps; differences between centres change SUV.
+**Transition:** Finally, how a DICOM image becomes a model's input.
+**Sources:** gatidis2022fdgpetct — the data; boellaard2015petguideline — SUV standardisation.
 -->
 
 ---

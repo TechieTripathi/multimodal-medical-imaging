@@ -8,6 +8,7 @@ import { load } from '@slidev/parser/fs'
 const UNNUMBERED = ['institution-cover', 'opener', 'sources']
 const TAGS = ['actual', 'real-data', 'illustrative', 'simulated', 'teaching', 'published']
 const WORD_LIMIT = 45
+const EXPECTED = Number(readFileSync('data/sections.ts', 'utf8').match(/CORE_SLIDES = (\d+)/)[1])
 
 const root = process.cwd()
 const data = await load({ roots: [root], userRoot: root }, resolve(root, 'slides.md'))
@@ -59,7 +60,8 @@ core.forEach((s, i) => {
 })
 
 const openers = slides.filter(s => s.frontmatter?.layout === 'opener').length
-console.log(`Core slides: ${core.length} (expected 58); openers: ${openers}; appendix: ${slides.filter(s => s.frontmatter?.layout === 'sources').length}; cover: ${slides.filter(s => s.frontmatter?.layout === 'institution-cover').length}`)
+if (core.length !== EXPECTED) problems.push(`Core slides: ${core.length}, expected ${EXPECTED} (data/sections.ts)`)
+console.log(`Core slides: ${core.length} (expected ${EXPECTED}); openers: ${openers}; appendix: ${slides.filter(s => s.frontmatter?.layout === 'sources').length}; cover: ${slides.filter(s => s.frontmatter?.layout === 'institution-cover').length}`)
 console.log('Slides per section:', perSection)
 console.log(`Reference keys defined: ${keys.size}`)
 if (warnings.length) console.log(`\n${warnings.length} warning(s):\n- ${warnings.join('\n- ')}`)

@@ -32,7 +32,7 @@ sources: [he2016resnet]
 <NeuralNetIntuition />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Build an intuition for layers: simple patterns first, larger patterns later.
 **Say:** A neural network is a long chain of simple steps, organised in layers. Each layer looks for patterns in the output of the layer before. These are real outputs from a well-known network, ResNet-50, when we feed it our patient's CT slice. [click] The early layer responds to edges and brightness: the outline of the body, the vessels. [click] A middle layer responds to textures and outlines. [click] A late layer works on a coarse 14 by 14 grid and responds to large patterns. [click] Finally, a last layer turns those patterns into an answer, but only after the network has been trained on many labelled examples.
 **Example:** Like a team: one person spots lines, the next spots shapes made of lines, the last says "that is a lung".
@@ -59,7 +59,7 @@ sources: [lidc2015data, dosovitskiy2021vit]
 <PixelsToNumbers />
 
 <!--
-**Time:** ~2.5 min
+**Time:** ~2 min
 **Objective:** Make "image = numbers" concrete with real stored values.
 **Say:** Our patient's chest X-ray is 2022 by 2022 pixels. Each pixel stores one number, here between about 0 and 15,000, for how much X-ray got through. [click] Zoom into the small yellow square. [click] These are the real stored numbers from the file. Brighter means a higher number. [click] Many modern image models, called vision transformers, first shrink the image to 224 by 224 pixels and cut it into 16 by 16 patches: 196 patches, which the model then treats a bit like words in a sentence.
 **Example:** A spreadsheet with four million cells, where the cell value sets the brightness.
@@ -87,7 +87,7 @@ sources: [devlin2019bert, zhang2025biomedclip]
 <TokenizerDemo />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Show that text becomes numbers through tokens, using the real vocabulary of the model we use later.
 **Say:** A text model cannot read letters either. First the sentence is cut into pieces called tokens. [click] Common words stay whole: "nodule", "lobe", "left". Rarer words are split into pieces that the model knows; the pieces marked in orange continue the word before. [click] Each token is then just a number: its position in a vocabulary of about 29,000 pieces. This is the real tokenizer of BiomedCLIP, running live in this page.
 **Example:** "Cardiopulmonary" is one token, because it appears often in medical abstracts; "cardiomegaly" is split into four pieces.
@@ -115,7 +115,7 @@ sources: [zhang2025biomedclip]
 <EmbeddingMap />
 
 <!--
-**Time:** ~2.5 min
+**Time:** ~2 min
 **Objective:** Introduce embeddings as fingerprints, with a real map from a real model.
 **Say:** After all its layers, the image encoder of BiomedCLIP turns every picture into a list of 512 numbers. Call it the image's fingerprint, or in the jargon, its embedding. We cannot draw 512 dimensions, so here each fingerprint is squashed down to two numbers and placed on a map. These are 44 real images from six public datasets. [click] Look where they landed: X-rays together, retina photos together, pathology together. [click] Nobody told the model what kind of image each one was. Similar pictures simply get similar fingerprints.
 **Example:** Like a library where similar books end up on nearby shelves without anyone reading the labels.
@@ -168,7 +168,7 @@ sources: [radford2021clip, zhang2025biomedclip, demnerfushman2016iu]
 <ContrastiveMatrix />
 
 <!--
-**Time:** ~2.5 min
+**Time:** ~2 min
 **Objective:** Explain contrastive learning with a batch matrix, then confront it with a real result.
 **Say:** Here are six chest X-rays and, on the left, a sentence from each one's report. During training, the model sees a batch like this and scores every picture against every sentence. [click] At the start, every picture looks equally like every sentence. [click] Training rewards a high score on the diagonal, the true pairs, and a low score everywhere else. Repeat this over millions of pairs: that is contrastive learning, the method behind CLIP. [click] Now the real thing. These are BiomedCLIP's actual scores for these six real X-rays. The correct sentence wins for only two of the six. Subtle findings such as a scoliosis or a small granuloma are hard to see at this resolution, and several sentences describe small details.
 **Example:** Like a matching exercise in an exam: draw lines between six pictures and six captions.
@@ -222,7 +222,7 @@ sources: [vaswani2017attention, alayrac2022flamingo]
 <CrossAttention />
 
 <!--
-**Time:** ~2 min
+**Time:** ~1.5 min
 **Objective:** Give an intuition for attention and cross-attention.
 **Say:** Some multimodal models go further than comparing two fingerprints. With cross-attention, each word in the text can look at the image and decide which parts matter for it. [click] "Nodule" looks at the lump. [click] "Left" looks at the left lung, which is on the right of the screen, because CT is viewed as if facing the patient. [click] "Lower" looks at the lower lobe. [click] And "spiculated" looks at the spiky edge of the nodule. Small words like "the" spread their attention thinly.
 **Example:** Like reading a report while pointing at the image with your finger as each word comes up.
