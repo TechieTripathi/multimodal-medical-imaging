@@ -147,7 +147,7 @@ Use the same visual theme as the other decks in the series, so this session look
 | Section openers | `--night` #16181c / `--night-2` #2a2e35 |
 | Fonts | IBM Plex Sans for text; IBM Plex Mono only for code, DICOM tags and numbers from the machine. Bundled locally, no CDN |
 | Shape and motion | `--radius` 6px, 1.5px strokes, `--dur` 0.4s, `--ease`, reduced-motion support |
-| Cover | The shared institutional cover: ZeroZeta, SRHU and IIT Roorkee logos, presenter block, navy band |
+| Cover | The shared institutional cover: E&ICT Academy IIT Roorkee, SRHU and IIT Roorkee logos, presenter block, navy band |
 | Footer | Section name left, slide number right, source numbers between, in the same quiet style |
 | Honesty label | The same dashed-outline pill as the series, with this deck's label kinds (§5) |
 

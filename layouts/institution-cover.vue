@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import zerozeta from '../assets/logos/zerozeta.png'
+import eict from '../assets/logos/eict-iitr.png'
 import srhu from '../assets/logos/srhu-naac.png'
 import iitr from '../assets/logos/iit-roorkee.png'
 
@@ -17,7 +17,7 @@ withDefaults(defineProps<{
   <div class="slidev-layout icover">
     <div class="cv">
       <div class="cvlogos">
-        <span class="cvlogo l"><img :src="zerozeta" alt="ZeroZeta"></span>
+        <span class="cvlogo l"><img :src="eict" alt="E&amp;ICT Academy, IIT Roorkee"></span>
         <span class="cvlogo c"><img :src="srhu" alt="Swami Rama Himalayan University — NAAC A+"></span>
         <span class="cvlogo r"><img :src="iitr" alt="Indian Institute of Technology Roorkee"></span>
       </div>
@@ -56,7 +56,7 @@ withDefaults(defineProps<{
 }
 .cvlogos { width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex: none; }
 .cvlogo { display: flex; align-items: flex-start; min-height: 150px; flex: none; }
-.cvlogo.l img { width: 270px; height: auto; margin-top: 14px; }
+.cvlogo.l img { height: 104px; width: auto; margin-top: 22px; }
 .cvlogo.c img { height: 172px; width: auto; }
 .cvlogo.r img { height: 140px; width: auto; }
 .cvtitle {
