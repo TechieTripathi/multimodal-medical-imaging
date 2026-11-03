@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useStep } from '../../composables/useStep'
 import cells from '../../data/notebook/cells.json'
 import run from '../../data/runs/notebook.json'
+import ColabLink from '../ui/ColabLink.vue'
 
 // Demo E — two Python cells of the companion notebook (Workflow E), exactly as they ran in Jupyter,
 // with their printed insights and figures. The same code runs from a terminal as dicom_insights.py.
@@ -25,6 +26,7 @@ const pick = (i: number) => { which.value = i; showOut.value = true }
     <div class="bar">
       <button v-for="(c, i) in props.cells" :key="c" class="chip" :aria-pressed="which === i" @click="pick(i)">cell {{ c }}</button>
       <span class="cmd mono">python dicom_insights.py {{ props.script[which] }}</span>
+      <ColabLink which="dicom" label="Open in Colab" small />
     </div>
     <pre class="code" :class="{ small: showOut }">{{ cell.code }}</pre>
     <div v-if="showOut" class="out rv on">
@@ -42,7 +44,7 @@ const pick = (i: number) => { which.value = i; showOut.value = true }
 .np { display: flex; flex-direction: column; gap: 8px; }
 .bar { display: flex; gap: 8px; align-items: center; }
 .bar .chip { padding: 5px 12px; font-size: 15px; }
-.cmd { margin-left: auto; font-size: 14px; background: var(--night); color: #e8eaed; padding: 5px 10px; border-radius: 4px; }
+.cmd { margin-left: auto; margin-right: 4px; font-size: 14px; background: var(--night); color: #e8eaed; padding: 5px 10px; border-radius: 4px; }
 .code { margin: 0; font: 400 13px/1.45 var(--font-mono); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 8px 12px; white-space: pre-wrap; max-height: 330px; overflow: auto; transition: max-height var(--dur) var(--ease); }
 .code.small { max-height: 58px; -webkit-mask-image: linear-gradient(#000 50%, transparent); mask-image: linear-gradient(#000 50%, transparent); }
 .out { display: flex; gap: 16px; align-items: flex-start; }

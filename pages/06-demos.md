@@ -5,7 +5,7 @@ section: 6
 
 # What happens when we run real models?
 
-<p>Three workflows on our patient, run in the companion notebook. Every number is from that run.</p>
+<p>Five workflows on real DICOM, run in the companion notebook. Every number is from that run.</p>
 
 <!--
 **Time:** ~0.5 min
@@ -23,19 +23,19 @@ run: notebook.json
 sources: [lidc2015data, zhang2025biomedclip, wasserthal2023totalseg, ma2024medsam]
 ---
 
-# Four workflows on real data
+# Five workflows on real data
 
 <DemoPlan />
 
 <!--
 **Time:** ~2 min
 **Objective:** Set out the demos, the data, the models and real run times.
-**Say:** Four workflows. The first three use our patient. A: open the DICOM CT and look at it properly; no AI yet. B: ask BiomedCLIP which description fits our patient's X-ray. C: outline the anatomy and the nodule with two segmentation models. D: open real DICOM files from six kinds of scanner, ending with a PET SUV calculation. The times are measured: BiomedCLIP takes about two hundredths of a second per image on this GPU and over a second on a laptop CPU.
+**Say:** Five workflows. A, B, C and E use our patient. A: open the DICOM CT and look at it properly; no AI yet. B: ask BiomedCLIP which description fits our patient's X-ray. C: outline the anatomy and the nodule with two segmentation models. D: open real DICOM files from six kinds of scanner, ending with a PET SUV calculation. E: plain Python that turns the files into measurements and an audit. The times are measured: BiomedCLIP takes about five thousandths of a second per image on this GPU and about three hundredths on this machine's CPU. Anyone can run the DICOM notebook in Google Colab from the orange button or the QR code; it needs no GPU and takes about two minutes.
 **Example:** Participants can run A and B on a laptop; C is better on a GPU, and the notebook uses a fast mode on CPU.
 **Try / Notice:** None.
 **Ask:** None.
 **Caveat:** TotalSegmentator's first run also downloads its weights, which takes longer.
-**Steps:** Open notebook/multimodal-medical-imaging.ipynb; run the setup cell; confirm the "Running on …" line.
+**Steps:** Open notebook/multimodal-medical-imaging.ipynb (or the Colab button); run the setup cell; confirm the "Running on …" line.
 **Expected observations:** The setup cell prints the GPU name (or CPU).
 **Likely failure modes:** Missing data folder (run download_data.py); no internet for first model download.
 **Fallback:** Stay on the slides; they show the saved output of the same notebook.
@@ -273,7 +273,7 @@ sources: [gatidis2022fdgpetct, dicomstandard]
 # Demo D: real DICOM from six scanners
 
 ::default::
-<NotebookCell cell="D3" :lines="[3, 4, 5, 6, 7]" :steps="[[3, 4, 5], [6, 7]]" :out-lines="2" />
+<NotebookCell cell="D3" :lines="[3, 4, 5, 6, 7]" :steps="[[3, 4, 5], [6, 7]]" :out-lines="2" colab="dicom" />
 
 <!--
 **Time:** ~1.5 min

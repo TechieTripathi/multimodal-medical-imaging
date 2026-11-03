@@ -50,7 +50,7 @@
  },
  "B5": {
   "code": "# B5. How long does one image take?\ndef time_one(device, n=20):\n    m = model.to(device)\n    x = image.to(device)\n    with torch.no_grad():\n        m.encode_image(x)                                   # warm-up\n        t = time.perf_counter()\n        for _ in range(n):\n            m.encode_image(x)\n        if device == 'cuda': torch.cuda.synchronize()\n    return (time.perf_counter() - t) / n\n\ntimings = {'cpu_s': round(time_one('cpu', 5), 3)}\nif DEVICE == 'cuda':\n    timings['gpu_s'] = round(time_one('cuda'), 4)\nmodel = model.to(DEVICE)\nprint('Seconds per image:', timings)",
-  "output": "Seconds per image: {'cpu_s': 1.07, 'gpu_s': 0.01}",
+  "output": "Seconds per image: {'cpu_s': 0.032, 'gpu_s': 0.0051}",
   "figures": []
  },
  "C1": {

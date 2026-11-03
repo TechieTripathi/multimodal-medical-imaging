@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useStep } from '../../composables/useStep'
+import ColabLink from '../ui/ColabLink.vue'
 
 // Slide 58 — what to remember, and where research is needed. clicks: 1
 const { step } = useStep(1)
@@ -24,6 +25,7 @@ const { step } = useStep(1)
         <li>Calibrated scores that mean what they say</li>
         <li>Checking generated reports, sentence by sentence</li>
       </ol>
+      <div class="try"><ColabLink which="dicom" label="Try the DICOM notebook in Colab" qr /></div>
     </div>
   </div>
 </template>
@@ -33,4 +35,5 @@ const { step } = useStep(1)
 h3 { font-size: var(--fs-lead) !important; color: var(--accent) !important; margin-bottom: 14px !important; }
 ol { font-size: var(--fs-label); padding-left: 1.2em; }
 li { margin-bottom: 10px !important; line-height: 1.3; }
+.try { margin-top: 10px; }
 </style>

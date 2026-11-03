@@ -15,6 +15,7 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 | Offline build | `exports/spa`, 23 MB including the 5.3 MB DICOM sample pack, no runtime network calls |
 | PDF | All click states (246 pages), handout (77 pages), speaker notes (35 pages); DICOM slides render their real files |
 | Notebook | Executes top to bottom on GPU (RTX PRO 4000) in a clean env; outputs saved; demo slides show its cells and outputs |
+| Colab notebook | `dicom-analysis-colab.ipynb` run end to end from an empty folder (clone the repo, download from TCIA): 16 code cells in 27 s, outputs match the main notebook; Colab buttons and QR codes point to the GitHub copies |
 
 ## Tests performed
 
@@ -42,7 +43,7 @@ Deck: *Multimodal AI Models for Medical Imaging Analysis*. Checked 30 October 20
 | Retina zero-shot, 4 diagnoses, 200 photos | 27% (chance 25%) |
 | MedSAM vs 4 radiologists (nodule slice) | Dice 0.75–0.77; readers among themselves 0.91–0.94 (slice), 0.84–0.90 (3D) |
 | TotalSegmentator | lungs 3.7 L, heart 370 ml; nodule 99.9% inside "lung" |
-| BiomedCLIP speed | 0.024 s per image on GPU, 1.2 s on CPU |
+| BiomedCLIP speed | 0.0051 s per image on GPU, 0.032 s on the workstation CPU (re-run 3 November 2026) |
 | PET SUV from DICOM tags | 300 MBq FDG, scan 60.1 min after injection, 205.3 MBq left, 61 kg; tumour SUVmax 18.1 (3D), 14.2 on the shown slice; volume 134 ml |
 
 ## Known limitations and open items

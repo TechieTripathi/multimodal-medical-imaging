@@ -35,6 +35,16 @@ Companion to the FDP session *Multimodal AI Models for Medical Imaging Analysis*
 **Privacy.** These datasets were de-identified by their publishers. Hospital DICOM files are not: never upload real patient files to online notebooks or AI services.
 
 **Interpretation.** Every score in this notebook is a research output, not a diagnosis."""),
+    ('code', None, """# Colab only: fetch the project and data and install what Colab lacks (about 5 minutes).
+# In Colab choose Runtime > Change runtime type > GPU first. Elsewhere this cell does nothing.
+import os, subprocess, sys
+if 'google.colab' in sys.modules and not os.path.exists('download_data.py'):
+    if not os.path.exists('multimodal-medical-imaging'):
+        subprocess.run(['git', 'clone', '--depth', '1', 'https://github.com/TechieTripathi/multimodal-medical-imaging.git'], check=True)
+    os.chdir('multimodal-medical-imaging/notebook')
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'pydicom', 'SimpleITK', 'nibabel', 'open_clip_torch', 'TotalSegmentator'], check=True)
+    subprocess.run([sys.executable, 'download_data.py'], check=True)
+print('Working folder:', os.getcwd())"""),
     ('code', None, """# Setup: libraries and paths. Runs on a GPU if one is available, otherwise on the CPU.
 import glob, json, os, time
 import numpy as np
@@ -433,6 +443,110 @@ print('saved ../data/runs/notebook.json')"""),
 ]
 
 
+COLAB_NB = os.path.join(HERE, 'dicom-analysis-colab.ipynb')
+COLAB_URL = 'https://colab.research.google.com/github/TechieTripathi/multimodal-medical-imaging/blob/main/notebook/'
+
+
+def colab_cells():
+    """Cells of dicom-analysis-colab.ipynb: a real-world DICOM analysis that runs on a free Colab CPU
+    in about two minutes. Reuses the tested cells A1-A3, D1-D4 and E0-E4, with paths for Colab."""
+    src = {tag: code for kind, tag, code in CELLS if tag}
+    pack = lambda c: c.replace("'../public/dicom/", "f'{PACK}/")
+    cells = [
+        ('md', None, """# Real-world DICOM analysis in Python
+
+From the FDP session *Multimodal AI Models for Medical Imaging Analysis*. Everything here uses **real, public, de-identified DICOM files** and runs on a normal (free) Colab machine: no GPU needed, about two minutes.
+
+1. **From the archive:** download a whole CT study and four radiologists' outlines from The Cancer Imaging Archive, sort the slices, convert to Hounsfield units, window them, view three planes and measure the nodule in 3D.
+2. **Six kinds of scanner:** CT, X-ray, MRI, mammogram, ultrasound video and PET, with the tags that matter for each.
+3. **Analyses and insights:** tissue composition, nodule measurements, PET tumour SUV, and a metadata audit.
+
+**Run it:** *Runtime → Run all*, or press Shift+Enter cell by cell.
+
+**Data:** LIDC-IDRI, UPENN-GBM, CMMD, B-mode-and-CEUS-Liver and FDG-PET-CT-Lesions from TCIA (CC BY). **Privacy:** these files were de-identified by their publishers. Never upload real patient files to Colab or any online service."""),
+        ('code', 'C0', """# Setup: get the sample pack and install the DICOM libraries (about a minute)
+import glob, io, os, subprocess, sys, zipfile
+if os.path.exists('../public/dicom'):                 # running inside the project folder
+    PACK = '../public/dicom'
+else:                                                 # Colab, or anywhere else: fetch the project
+    if not os.path.exists('multimodal-medical-imaging'):
+        subprocess.run(['git', 'clone', '--depth', '1', 'https://github.com/TechieTripathi/multimodal-medical-imaging.git'], check=True)
+    PACK = 'multimodal-medical-imaging/public/dicom'
+subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'pydicom', 'SimpleITK'], check=True)
+import numpy as np
+import pydicom
+import requests
+import SimpleITK as sitk
+import matplotlib.pyplot as plt
+print(len(glob.glob(f'{PACK}/*.dcm')), 'DICOM files in the sample pack')"""),
+        ('md', None, """## 1. From the archive: a whole CT study
+
+Real analyses start from an archive. Here we download one patient's chest CT (133 files) and the four radiologists' nodule outlines (DICOM SEG) from The Cancer Imaging Archive's public API."""),
+        ('code', 'C1', """# 1. Download the CT series and the four outlines of patient LIDC-IDRI-0001 (about 70 MB)
+API = 'https://services.cancerimagingarchive.net/nbia-api/services/v1'
+DATA = 'data/raw'
+LIDC = os.path.join(DATA, 'lidc')
+series = requests.get(f'{API}/getSeries', params={'Collection': 'LIDC-IDRI', 'PatientID': 'LIDC-IDRI-0001'}, timeout=60).json()
+for s in series:
+    if s['Modality'] in ('CT', 'SEG'):
+        d = os.path.join(LIDC, f"{s['Modality']}-{s['SeriesInstanceUID']}")
+        if not os.path.isdir(d):
+            z = requests.get(f'{API}/getImage', params={'SeriesInstanceUID': s['SeriesInstanceUID']}, timeout=600).content
+            zipfile.ZipFile(io.BytesIO(z)).extractall(d)
+        print(s['Modality'], len(glob.glob(os.path.join(d, '*.dcm'))), 'file(s)', s.get('SeriesDescription', ''))"""),
+        ('code', 'A1', src['A1']),
+        ('code', 'A1b', src['A1b']),
+        ('code', 'A2', src['A2']),
+        ('code', 'A3', src['A3']),
+        ('code', 'C2', """# 1e. Measure the nodule in 3D from the four radiologists' DICOM SEG files, on the CT grid
+z0, dz = ct.GetOrigin()[2], ct.GetSpacing()[2]
+readers = []
+for f in sorted(glob.glob(os.path.join(LIDC, 'SEG-*', '*.dcm'))):
+    s = pydicom.dcmread(f)
+    m = np.zeros(arr.shape, bool)
+    for frame, item in zip(s.pixel_array.reshape(-1, s.Rows, s.Columns), s.PerFrameFunctionalGroupsSequence):
+        m[int(round((float(item.PlanePositionSequence[0].ImagePositionPatient[2]) - z0) / dz))] |= frame > 0
+    readers.append(m)
+dice = lambda a, b: 2 * (a & b).sum() / (a.sum() + b.sum())
+for i, m in enumerate(readers, 1):
+    print(f'Reader {i}: {m.sum() * sx * sy * sz / 1000:.1f} ml, mean {arr[m].mean():.0f} HU, on {np.unique(np.nonzero(m)[0]).size} slices')
+pairs = [dice(readers[i], readers[j]) for i in range(4) for j in range(i + 1, 4)]
+print(f'Insight: the four radiologists agree with Dice {min(pairs):.2f}-{max(pairs):.2f}; judge any model against that spread')"""),
+        ('md', None, """## 2. Six kinds of scanner
+
+Small *teaching copies* of real DICOM files: every original tag kept, private tags removed, pixels downsampled where needed, and each change written into the file's `DerivationDescription`."""),
+        ('code', 'D1', pack(src['D1'])),
+        ('code', 'D2', pack(src['D2'])),
+        ('code', 'D3', pack(src['D3'])),
+        ('code', 'D4', pack(src['D4'])),
+        ('md', None, """## 3. Analyses and insights
+
+Four short analyses, each ending in one insight. The same code exists as `notebook/dicom_insights.py` in the project, for running from a terminal."""),
+        ('code', 'E0', src['E0'].replace("PACK = '../public/dicom'\n", '')),
+        ('code', 'E1', src['E1']),
+        ('code', 'E2', src['E2']),
+        ('code', 'E3', src['E3']),
+        ('code', 'E4', src['E4']),
+        ('md', None, """## What to take away
+
+* **Units and geometry live in the tags.** Hounsfield units, pixel size, slice position, PET dose and timing: without them, the pixels cannot be measured.
+* **Experts disagree.** Four radiologists' volumes for one nodule differ by more than a quarter.
+* **Check before you trust.** Some files record no pixel size; an audit finds that in seconds.
+* These are research analyses on public data, not clinical measurements."""),
+    ]
+    return cells
+
+
+def build_colab():
+    nb = nbf.v4.new_notebook()
+    for kind, tag, src in colab_cells():
+        nb.cells.append(nbf.v4.new_markdown_cell(src) if kind == 'md' else nbf.v4.new_code_cell(src))
+    nb.metadata['kernelspec'] = {'name': 'python3', 'display_name': 'Python 3', 'language': 'python'}
+    nb.metadata['colab'] = {'provenance': [], 'name': 'dicom-analysis-colab.ipynb'}
+    nbf.write(nb, COLAB_NB)
+    print('wrote', COLAB_NB)
+
+
 def build():
     nb = nbf.v4.new_notebook()
     for kind, tag, src in CELLS:
@@ -444,6 +558,7 @@ def build():
     nbf.write(nb, NB)
     print('wrote', NB)
     write_script()
+    build_colab()
 
 
 SCRIPT_ANALYSES = [('tissue', 'E1'), ('nodule', 'E2'), ('pet', 'E3'), ('audit', 'E4')]

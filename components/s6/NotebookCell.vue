@@ -3,11 +3,12 @@ import { computed } from 'vue'
 import { useStep } from '../../composables/useStep'
 import cells from '../../data/notebook/cells.json'
 import run from '../../data/runs/notebook.json'
+import ColabLink from '../ui/ColabLink.vue'
 
 // Artifact 24 — a cell of the companion notebook, exactly as it ran. Only the chosen lines are shown
 // (gaps marked "…"); each click highlights the next group of lines; the last click shows the cell's
 // real output or figure. clicks: steps.length
-const props = defineProps<{ cell: keyof typeof cells, lines: number[], steps: number[][], outLines?: number, figure?: boolean }>()
+const props = withDefaults(defineProps<{ cell: keyof typeof cells, lines: number[], steps: number[][], outLines?: number, figure?: boolean, colab?: 'dicom' | 'full' }>(), { colab: 'full' })
 const { step } = useStep(props.steps.length)
 const figs = import.meta.glob('../../data/notebook/*.png', { eager: true, import: 'default' }) as Record<string, string>
 const c = cells[props.cell]
@@ -32,7 +33,7 @@ const fig = c.figures[0] ? figs[`../../data/notebook/${c.figures[0]}`] : null
 <template>
   <div class="nc" :class="{ withfig: figure && fig }">
     <div class="code">
-      <p class="hd">notebook cell {{ props.cell }}</p>
+      <p class="hd hdrow">notebook cell {{ props.cell }} <ColabLink :which="props.colab" label="Open in Colab" small /></p>
       <div class="pre"><span v-for="l in shown" :key="l.n" class="ln" :class="{ hot: hot.includes(l.n), gap: l.gap, dim: hot.length && !hot.includes(l.n) && !l.gap }"><span class="no">{{ l.gap ? '' : l.n }}</span>{{ l.text }}</span></div>
     </div>
     <div class="out rv" :class="{ on: showOut }">
@@ -47,6 +48,7 @@ const fig = c.figures[0] ? figs[`../../data/notebook/${c.figures[0]}`] : null
 .nc { display: flex; flex-direction: column; gap: 12px; }
 .nc.withfig { display: grid; grid-template-columns: 1.15fr 1fr; align-items: start; }
 .hd { font-size: 14px; color: var(--ink-3); margin: 0 0 4px; }
+.hdrow { display: flex; justify-content: space-between; align-items: center; }
 pre, .pre { margin: 0; font: 400 17px/1.45 var(--font-mono); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 10px 12px; white-space: pre-wrap; word-break: break-word; }
 .ln { display: block; white-space: pre-wrap; padding-left: 2.6em; text-indent: -2.6em; border-radius: 3px; transition: background var(--dur) var(--ease), opacity var(--dur) var(--ease); }
 .no { display: inline-block; width: 2.2em; text-indent: 0; color: var(--ink-3); font-size: 14px; }
